@@ -65,17 +65,19 @@ namespace TspAcoSolver
         }
         public WeightedGraph ToGraph()
         {
-            List<Nbr>[] adjList = new List<Nbr>[Size];
+            double[,] adjMat = new double[Size,Size];
             for (int i = 0; i < Size; i++)
             {
-                adjList[i] = new List<Nbr>();
+                for (int j = 0; j < Size; j++)
+                {
+                    adjMat[i, j] = 0;
+                }
             }
             foreach (Pathway pathway in pathways)
             {
-                Nbr nbr = new Nbr(pathway.To, pathway.Dist);
-                adjList[pathway.From].Add(nbr);
+                adjMat[pathway.From, pathway.To] = pathway.Dist;
             }
-            return new WeightedGraph(adjList);
+            return new WeightedGraph(adjMat);
         }
     }
 }

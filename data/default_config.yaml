@@ -1,3 +1,4 @@
 evaporation_coef: 0.5
 ant_count: 100
 thread_count: 3
+pheromone_amount: 100

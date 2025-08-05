@@ -1,35 +1,51 @@
 namespace TspAcoSolver
 {
-    public struct Nbr
-    {
-        public int Vertex { get; set; }
-        public double Dist { get; set; }
-
-        public Nbr(int vertex, double dist)
-        {
-            Vertex = vertex;
-            Dist = dist;
-        }
-    }
     public class Graph
     {
-
-    }
-
-    public class WeightedGraph : Graph
-    {
         public int VertexCount { get; init; }
-        public List<Nbr>[] AdjList { get; init; }
+        public List<int>[] AdjList { get; init; }
 
-        public WeightedGraph(List<Nbr>[] adjList)
+        public Graph(List<int>[] adjList)
         {
             AdjList = adjList;
             VertexCount = AdjList.Length;
         }
+        public Graph(double[,] adjMat)
+        {
+            List<int>[] adjList = new List<int>[adjMat.GetLength(0)];
+            for (int i = 0; i < adjMat.GetLength(0); i++)
+            {
+                adjList[i] = new();
+                for (int j = 0; j < adjMat.GetLength(1); j++)
+                {
+                    if (adjMat[i, j] != 0)
+                    {
+                        adjList[i].Add(j);
+                    }
+                }
+            }
 
-        public List<Nbr> Nbrs(int vertex)
+            AdjList = adjList;
+            VertexCount = AdjList.Length;
+        }
+
+        public List<int> Nbrs(int vertex)
         {
             return AdjList[vertex];
+        }
+    }
+
+    public class WeightedGraph : Graph
+    {
+        public double[,] Weights { get; init; }
+        public WeightedGraph(double[,] adjMat) : base(adjMat)
+        {
+            Weights = adjMat;
+        }
+
+        public double Weight(int from, int to)
+        {
+            return Weights[from, to];
         }
     }
 
@@ -37,7 +53,7 @@ namespace TspAcoSolver
     {
         public double[,] Pheromones { get; set; }
         public double EvaporationCoef { get; init; }
-        public PheromoneGraph(List<Nbr>[] adjList, double evaporationCoef) : base(adjList)
+        public PheromoneGraph(double[,] adjMat, double evaporationCoef) : base(adjMat)
         {
             const double StartingPheromoneCount = 100;
             Pheromones = new double[VertexCount, VertexCount];
@@ -51,7 +67,7 @@ namespace TspAcoSolver
 
             EvaporationCoef = evaporationCoef;
         }
-        public PheromoneGraph(WeightedGraph graph, double evaporationCoef) : this(graph.AdjList, evaporationCoef) { }
+        public PheromoneGraph(WeightedGraph graph, double evaporationCoef) : this(graph.Weights, evaporationCoef) { }
 
         public void UpdatePheromones(double[,] pheromoneChange)
         {
@@ -69,7 +85,7 @@ namespace TspAcoSolver
     {
         public double Length { get; }
 
-        public void Add(Nbr nbr);
+        public void Add(int vertex);
     }
 
     public class Tour : ITour
@@ -79,16 +95,38 @@ namespace TspAcoSolver
         public double Length { get => _length; }
         public List<int> Vertices { get; init; }
 
+        WeightedGraph _graph;
 
-        public Tour()
+
+        public Tour(WeightedGraph graph)
         {
             Vertices = new();
+            _graph = graph;
         }
 
-        public void Add(Nbr nbr)
+        public void Add(int vertex)
         {
-            _length += nbr.Dist;
-            Vertices.Add(nbr.Vertex);
+            if (Vertices.Count != 0)
+            {
+                _length += _graph.Weight(Vertices[Vertices.Count-1], vertex);
+            }
+            Vertices.Add(vertex);
+        }
+
+        // public bool IsValid()
+        // {
+        //     return
+        // }
+
+        public override string ToString()
+        {
+            string res = "";
+
+            foreach (int vertex in Vertices)
+            {
+                res += $"{vertex} ";
+            }
+            return res;
         }
 
     }
@@ -96,6 +134,6 @@ namespace TspAcoSolver
     {
         public double Length { get => Double.PositiveInfinity; }
 
-        public void Add(Nbr nbr) { }
+        public void Add(int vertex) { }
     }
 }

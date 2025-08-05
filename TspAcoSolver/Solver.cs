@@ -21,6 +21,7 @@ namespace TspAcoSolver
         public double EvaporationCoef { get; set; }
         public int AntCount { get; set; }
         public int ThreadCount { get; set; }
+        public int PheromoneAmount { get; set; }
     }
     public class Solver
     {
@@ -28,7 +29,7 @@ namespace TspAcoSolver
         SolvingParams sParams;
 
         PheromoneGraph Graph { get; init; }
-        Ant[] AntColony { get; init; }
+        Colony AntColony { get; init; }
 
         ITour currBestTour = new InfiniteTour();
 
@@ -41,45 +42,68 @@ namespace TspAcoSolver
 
             Graph = new PheromoneGraph(this.problem.ToGraph(), this.sParams.EvaporationCoef);
 
-            AntColony = new Ant[this.sParams.AntCount];
-            for (int i = 0; i < this.sParams.AntCount; i++)
-            {
-                AntColony[i] = new Ant();
-            }
+            AntColony = new Colony(this.sParams.AntCount);
         }
 
         bool IsTerminating()
         {
             return iterationCount == 100;
         }
+
+        void UpdatePheromones(Tour[] solutions)
+        {
+            double[,] pheromoneChange = new double[Graph.VertexCount,Graph.VertexCount];
+
+            for (int i = 0; i < Graph.VertexCount; i++)
+            {
+                for (int j = 0; j < Graph.VertexCount; j++)
+                {
+                    pheromoneChange[i, j] = 0;
+                }
+            }
+            double updateAmount;
+            foreach (Tour sol in solutions)
+            {
+                updateAmount = sParams.PheromoneAmount / sol.Length;
+                for (int i = 0; i < sol.Vertices.Count - 1; i++)
+                {
+                    pheromoneChange[sol.Vertices[i], sol.Vertices[i + 1]] = updateAmount;
+                }
+            }
+
+            Graph.UpdatePheromones(pheromoneChange);
+        }
+
         public ITour Solve()
         {
             currBestTour = new InfiniteTour();
-
-            Tour currTour;
             while (!IsTerminating())
             {
-                foreach (Ant ant in AntColony)
+                Tour[] solutions = AntColony.GenerateSolutions(Graph);
+
+                foreach (Tour sol in solutions)
                 {
-                    ant.FindTour(Graph); //TODO: check if valid tour
-                    currTour = ant.LastTour;
-                    foreach (int ver in currTour.Vertices)
+                    //TODO: check if valid tour
+                    foreach (int ver in sol.Vertices)
                     {
                         Console.Write($"{ver} ");
                     }
-                    Console.WriteLine($" Lenght: {currTour.Length}");
+                    Console.WriteLine($" Lenght: {sol.Length}");
 
-                    if (currTour.Vertices.Count != Graph.AdjList.Length) continue;
+                    if (sol.Vertices.Count != Graph.AdjList.Length) continue;
                     Console.WriteLine($"Found valid tour");
                     Console.WriteLine($"Best: {currBestTour.Length}");
 
-                    if (currTour.Length < currBestTour.Length)
+                    if (sol.Length < currBestTour.Length)
                     {
                         Console.WriteLine($"Found better tour");
 
-                        currBestTour = currTour;
+                        currBestTour = sol;
                     }
                 }
+
+                UpdatePheromones(solutions);
+
                 iterationCount++;
             }
             return currBestTour;
