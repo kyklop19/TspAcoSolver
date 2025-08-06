@@ -44,12 +44,20 @@ namespace TspAcoSolver
 
         void SetProblem(string problemType, string path)
         {
-            switch (problemType.ToLower())
+            if (path.EndsWith(".csv"))
             {
-                case "tsp":
-                    Problem = new TravelingSalesmanProblem();
-                    Problem.Read(path);
-                    break;
+                switch (problemType.ToLower())
+                {
+                    case "tsp":
+                        CsvParser csvParser = new();
+                        Problem = csvParser.Parse(path);
+                        break;
+                }
+            }
+            else if (path.EndsWith(".tsp"))
+            {
+                TspParser tspParser = new();
+                Problem = tspParser.Parse(path);
             }
         }
 

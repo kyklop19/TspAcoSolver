@@ -1,18 +1,15 @@
-using Microsoft.VisualBasic.FileIO;
-
 namespace TspAcoSolver
 {
     public interface IProblem
     {
-        public void Read(string path);
         public WeightedGraph ToGraph();
     }
 
-    struct Pathway
+    public struct Pathway
     {
-        public int From {get; set;}
-        public int To {get; set;}
-        public double Dist {get; set;}
+        public int From { get; set; }
+        public int To { get; set; }
+        public double Dist { get; set; }
         public Pathway(int from, int to, double dist)
         {
             From = from;
@@ -23,61 +20,72 @@ namespace TspAcoSolver
 
     public class TravelingSalesmanProblem : IProblem
     {
-        List<Pathway> pathways = new List<Pathway>();
-        public int Size { get; set; }
+        List<Pathway> _pathways = new();
+        public int VertexCount { get; init; }
 
-        public TravelingSalesmanProblem()
+        public TravelingSalesmanProblem(int vertexCount, List<Pathway> pathways)
         {
-            Size = 0;
-        }
-        public void Read(string path)
-        {
-            using (TextFieldParser csvParser = new TextFieldParser(path))
-            {
-                csvParser.CommentTokens = new string[] { "#" };
-                csvParser.SetDelimiters(new string[] { "," });
-                csvParser.HasFieldsEnclosedInQuotes = true;
-
-                while (!csvParser.EndOfData)
-                {
-
-                    string[] cols = csvParser.ReadFields();
-                    int from = Convert.ToInt32(cols[0]);
-                    int to = Convert.ToInt32(cols[1]);
-
-                    if (from + 1 > Size)
-                    {
-                        Size = from + 1;
-                    }
-                    if (to + 1 > Size)
-                    {
-                        Size = to + 1;
-                    }
-
-                    Pathway pathway = new Pathway(
-                                                    from,
-                                                    to,
-                                                    Convert.ToDouble(cols[2])
-                                                    );
-                    pathways.Add(pathway);
-                }
-            }
+            VertexCount = vertexCount;
+            _pathways = pathways;
         }
         public WeightedGraph ToGraph()
         {
-            double[,] adjMat = new double[Size,Size];
-            for (int i = 0; i < Size; i++)
+            double[,] adjMat = new double[VertexCount, VertexCount];
+            for (int i = 0; i < VertexCount; i++)
             {
-                for (int j = 0; j < Size; j++)
+                for (int j = 0; j < VertexCount; j++)
                 {
                     adjMat[i, j] = 0;
                 }
             }
-            foreach (Pathway pathway in pathways)
+            foreach (Pathway pathway in _pathways)
             {
                 adjMat[pathway.From, pathway.To] = pathway.Dist;
             }
             return new WeightedGraph(adjMat);
+        }
+    }
+
+    public abstract class SpaceTravelingSalesmanProblem : IProblem
+    {
+        List<double[]> coords;
+
+        public int Size { get => coords.Count; }
+
+        public int Dimension { get; init; }
+
+        public SpaceTravelingSalesmanProblem(int dimension, List<double[]> coords)
+        {
+            Dimension = dimension;
+            this.coords = coords;
+        }
+        public abstract double Distance(double[] coord1, double[] coord2);
+        public WeightedGraph ToGraph()
+        {
+            double[,] adjMat = new double[Size, Size];
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    adjMat[i, j] = Distance(coords[i], coords[j]);
+                }
+            }
+            return new WeightedGraph(adjMat);
+        }
+    }
+
+    public class EuclidTravelingSalesmanProblem : SpaceTravelingSalesmanProblem
+    {
+
+        public EuclidTravelingSalesmanProblem(int dimension, List<double[]> coords) : base(dimension, coords){}
+        public override double Distance(double[] coord1, double[] coord2)
+        {
+            double sum = 0;
+            for (int i = 0; i < Dimension; i++)
+            {
+                sum += Math.Pow(coord1[i] - coord2[i], 2);
+            }
+            return Math.Sqrt(sum);
         }
     }
 }

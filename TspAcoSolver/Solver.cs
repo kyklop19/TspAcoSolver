@@ -90,7 +90,7 @@ namespace TspAcoSolver
                     }
                     Console.WriteLine($" Lenght: {sol.Length}");
 
-                    if (sol.Vertices.Count != Graph.AdjList.Length) continue;
+                    if (sol.Vertices.Count - 1 != Graph.AdjList.Length) continue;
                     Console.WriteLine($"Found valid tour");
                     Console.WriteLine($"Best: {currBestTour.Length}");
 
