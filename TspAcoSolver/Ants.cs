@@ -13,63 +13,28 @@ namespace TspAcoSolver
             int firstVertex = rnd.Next(0, graph.VertexCount);
             CurrVertex = firstVertex;
             LastTour.Add(CurrVertex);
-            HashSet<int> unvisited = new();
 
-            for (int i = 0; i < graph.VertexCount; i++)
+            while (!LastTour.HasAllVerteces() && !LastTour.HasDeadEnd())
             {
-                unvisited.Add(i);
-            }
-            unvisited.Remove(CurrVertex);
-
-            bool FoundDeadEnd = false;
-            //TODO: add last edge
-            while (unvisited.Count != 0 && !FoundDeadEnd)
-            {
-                CurrVertex = ChooseNbr(graph, unvisited);
-                if (CurrVertex == -1)
-                {
-                    FoundDeadEnd = true;
-                }
-                else
-                {
-                    unvisited.Remove(CurrVertex);
-                    LastTour.Add(CurrVertex);
-                }
-            }
-
-            if (!FoundDeadEnd && graph.Nbrs(LastTour.Vertices[LastTour.Vertices.Count - 1]).Contains(firstVertex))
-            {
-                LastTour.Add(firstVertex);
+                CurrVertex = ChooseNbr(graph, LastTour.NextPossibleVertices());
+                LastTour.Add(CurrVertex);
             }
         }
 
-        int ChooseNbr(PheromoneGraph graph, HashSet<int> unvisited)
+        int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
             double sum = 0;
-            List<int> nbrs = graph.Nbrs(CurrVertex);
-            List<int> unvisited_nbrs = new List<int>();
-            foreach (int nbr in nbrs)
+
+            double[] probabilities = new double[unvisited_nbrs.Count];
+            for (int i = 0; i < unvisited_nbrs.Count; i++)
             {
-                if (unvisited.Contains(nbr))
-                {
-                    unvisited_nbrs.Add(nbr);
-                }
-            }
-            if (unvisited_nbrs.Count == 0)
-            {
-                return -1;
-            }
-            nbrs = unvisited_nbrs;
-            double[] probabilities = new double[nbrs.Count];
-            for (int i = 0; i < nbrs.Count; i++)
-            {
-                double attractiveness = 1 / graph.Weight(CurrVertex, nbrs[i]);
-                double trailLevel = graph.Pheromones[CurrVertex, nbrs[i]];
+                double attractiveness = 1 / graph.Weight(CurrVertex, unvisited_nbrs[i]);
+                double trailLevel = graph.Pheromones[CurrVertex, unvisited_nbrs[i]];
                 double probability = trailLevel * attractiveness;
                 probabilities[i] = probability;
                 sum += probability;
             }
-            for (int i = 0; i < nbrs.Count; i++)
+            for (int i = 0; i < unvisited_nbrs.Count; i++)
             {
                 probabilities[i] /= sum;
                 if (i != 0)
@@ -81,9 +46,17 @@ namespace TspAcoSolver
             Random rnd = new();
             double rndNum = rnd.NextDouble();
             int index = 0;
-            while (index != probabilities.Length - 1 && rndNum < probabilities[index]) index++;
+            while (index != probabilities.Length - 1 && rndNum > probabilities[index]) index++;
 
-            return nbrs[index];
+            // System.Console.WriteLine($"Rnd: {rndNum}");
+            // foreach (double prob in probabilities)
+            // {
+            //     System.Console.Write($"{prob} ");
+            // }
+            // System.Console.WriteLine($"Index: {index}");
+
+
+            return unvisited_nbrs[index];
         }
     }
 
@@ -100,14 +73,17 @@ namespace TspAcoSolver
             }
         }
 
-        public Tour[] GenerateSolutions(PheromoneGraph graph)
+        public List<Tour> GenerateSolutions(PheromoneGraph graph)
         {
-            Tour[] solutions = new Tour[AntCount];
+            List<Tour> solutions = new();
             for (int i = 0; i < AntCount; i++)
             {
                 Ant ant = _ants[i];
                 ant.FindTour(graph);
-                solutions[i] = ant.LastTour;
+                if (ant.LastTour.IsValid())
+                {
+                    solutions.Add(ant.LastTour);
+                }
             }
             return solutions;
         }

@@ -30,7 +30,10 @@ namespace TspAcoSolver
                         SetConfig(cmd[1]);
                         break;
                     case "solve":
-                        Console.WriteLine(GetSolution());
+                        ITour sol = GetSolution();
+                        Console.WriteLine(sol);
+                        Console.WriteLine($"Length: {sol.Length}");
+
                         break;
                     case "quit":
                         quit = true;

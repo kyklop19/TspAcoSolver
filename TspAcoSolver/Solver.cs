@@ -47,10 +47,10 @@ namespace TspAcoSolver
 
         bool IsTerminating()
         {
-            return iterationCount == 100;
+            return iterationCount == 500;
         }
 
-        void UpdatePheromones(Tour[] solutions)
+        void UpdatePheromones(List<Tour> solutions)
         {
             double[,] pheromoneChange = new double[Graph.VertexCount,Graph.VertexCount];
 
@@ -67,7 +67,7 @@ namespace TspAcoSolver
                 updateAmount = sParams.PheromoneAmount / sol.Length;
                 for (int i = 0; i < sol.Vertices.Count - 1; i++)
                 {
-                    pheromoneChange[sol.Vertices[i], sol.Vertices[i + 1]] = updateAmount;
+                    pheromoneChange[sol.Vertices[i], sol.Vertices[i + 1]] += updateAmount;
                 }
             }
 
@@ -79,26 +79,20 @@ namespace TspAcoSolver
             currBestTour = new InfiniteTour();
             while (!IsTerminating())
             {
-                Tour[] solutions = AntColony.GenerateSolutions(Graph);
-
+                List<Tour> solutions = AntColony.GenerateSolutions(Graph);
                 foreach (Tour sol in solutions)
                 {
-                    //TODO: check if valid tour
-                    foreach (int ver in sol.Vertices)
-                    {
-                        Console.Write($"{ver} ");
-                    }
+                    // Console.WriteLine(sol);
+
                     Console.WriteLine($" Lenght: {sol.Length}");
 
-                    if (sol.Vertices.Count - 1 != Graph.AdjList.Length) continue;
-                    Console.WriteLine($"Found valid tour");
-                    Console.WriteLine($"Best: {currBestTour.Length}");
 
                     if (sol.Length < currBestTour.Length)
                     {
                         Console.WriteLine($"Found better tour");
 
                         currBestTour = sol;
+                        Console.WriteLine($"Best: {currBestTour.Length}");
                     }
                 }
 
