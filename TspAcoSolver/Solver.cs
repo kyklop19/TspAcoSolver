@@ -7,7 +7,7 @@ namespace TspAcoSolver
     {
         public SolvingParams Read(string path)
         {
-            using System.IO.StreamReader r = new(@"C:\Users\havel\OneDrive\Dokumenty\Programming\TspAcoSolver\data\default_config.yaml");
+            using System.IO.StreamReader r = new(@"..\..\..\..\data\default_config.yaml");
             IDeserializer deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)  // see height_in_inches in sample yml
                 .Build();
@@ -22,6 +22,9 @@ namespace TspAcoSolver
         public int AntCount { get; set; }
         public int ThreadCount { get; set; }
         public int PheromoneAmount { get; set; }
+        public int IterationCount { get; set; }
+        public double TrailLevelFactor { get; set; }
+        public double AttractivenessFactor { get; set; }
     }
     public class Solver
     {
@@ -31,9 +34,9 @@ namespace TspAcoSolver
         PheromoneGraph Graph { get; init; }
         Colony AntColony { get; init; }
 
-        ITour currBestTour = new InfiniteTour();
+        ITour _currBestTour = new InfiniteTour();
 
-        int iterationCount = 0;
+        int _currIterationCount = 0;
 
         public Solver(IProblem problem, SolvingParams sParams)
         {
@@ -42,12 +45,12 @@ namespace TspAcoSolver
 
             Graph = new PheromoneGraph(this.problem.ToGraph(), this.sParams.EvaporationCoef);
 
-            AntColony = new Colony(this.sParams.AntCount);
+            AntColony = new Colony(this.sParams.AntCount, this.sParams.TrailLevelFactor, this.sParams.AttractivenessFactor);
         }
 
         bool IsTerminating()
         {
-            return iterationCount == 500;
+            return _currIterationCount == sParams.IterationCount;
         }
 
         void UpdatePheromones(List<Tour> solutions)
@@ -76,7 +79,7 @@ namespace TspAcoSolver
 
         public ITour Solve()
         {
-            currBestTour = new InfiniteTour();
+            _currBestTour = new InfiniteTour();
             while (!IsTerminating())
             {
                 List<Tour> solutions = AntColony.GenerateSolutions(Graph);
@@ -87,20 +90,20 @@ namespace TspAcoSolver
                     Console.WriteLine($" Lenght: {sol.Length}");
 
 
-                    if (sol.Length < currBestTour.Length)
+                    if (sol.Length < _currBestTour.Length)
                     {
                         Console.WriteLine($"Found better tour");
 
-                        currBestTour = sol;
-                        Console.WriteLine($"Best: {currBestTour.Length}");
+                        _currBestTour = sol;
+                        Console.WriteLine($"Best: {_currBestTour.Length}");
                     }
                 }
 
                 UpdatePheromones(solutions);
 
-                iterationCount++;
+                _currIterationCount++;
             }
-            return currBestTour;
+            return _currBestTour;
         }
 
     }

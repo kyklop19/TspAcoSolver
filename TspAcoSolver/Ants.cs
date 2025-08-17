@@ -2,8 +2,16 @@ namespace TspAcoSolver
 {
     public class Ant
     {
+        public double TrailLevelFactor { get; init; }
+        public double AttractivenessFactor { get; init; }
         public int CurrVertex { get; set; }
         public Tour LastTour { get; set; }
+
+        public Ant(double trailLevelFactor, double attractivenessFactor)
+        {
+            TrailLevelFactor = trailLevelFactor;
+            AttractivenessFactor = attractivenessFactor;
+        }
 
         public void FindTour(PheromoneGraph graph)
         {
@@ -21,6 +29,14 @@ namespace TspAcoSolver
             }
         }
 
+        double ScoreEdge(PheromoneGraph graph, int nbr)
+        {
+            double attractiveness = 1 / graph.Weight(CurrVertex, nbr);
+            double trailLevel = graph.Pheromones[CurrVertex, nbr];
+            double score = Math.Pow(trailLevel, TrailLevelFactor) * Math.Pow(attractiveness, AttractivenessFactor);
+            return score;
+        }
+
         int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
             double sum = 0;
@@ -28,11 +44,9 @@ namespace TspAcoSolver
             double[] probabilities = new double[unvisited_nbrs.Count];
             for (int i = 0; i < unvisited_nbrs.Count; i++)
             {
-                double attractiveness = 1 / graph.Weight(CurrVertex, unvisited_nbrs[i]);
-                double trailLevel = graph.Pheromones[CurrVertex, unvisited_nbrs[i]];
-                double probability = trailLevel * attractiveness;
-                probabilities[i] = probability;
-                sum += probability;
+                double score = ScoreEdge(graph, unvisited_nbrs[i]);
+                probabilities[i] = score;
+                sum += score;
             }
             for (int i = 0; i < unvisited_nbrs.Count; i++)
             {
@@ -64,12 +78,12 @@ namespace TspAcoSolver
     {
         Ant[] _ants;
         public int AntCount { get => _ants.Length; }
-        public Colony(int antCount)
+        public Colony(int antCount, double trailLevelFactor, double attractivenessFactor)
         {
             _ants = new Ant[antCount];
             for (int i = 0; i < antCount; i++)
             {
-                _ants[i] = new();
+                _ants[i] = new(trailLevelFactor, attractivenessFactor);
             }
         }
 

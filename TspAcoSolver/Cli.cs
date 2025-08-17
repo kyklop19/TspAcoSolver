@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace TspAcoSolver
 {
     public class Cli
@@ -30,7 +32,11 @@ namespace TspAcoSolver
                         SetConfig(cmd[1]);
                         break;
                     case "solve":
+                        Stopwatch stopWatch = new();
+                        stopWatch.Start();
                         ITour sol = GetSolution();
+                        stopWatch.Stop();
+                        Console.WriteLine($"Time elapsed: {stopWatch.Elapsed}");
                         Console.WriteLine(sol);
                         Console.WriteLine($"Length: {sol.Length}");
 

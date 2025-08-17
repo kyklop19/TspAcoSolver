@@ -1,4 +1,7 @@
-evaporation_coef: 0.5
-ant_count: 50
+evaporation_coef: 0.8
+ant_count: 100
 thread_count: 3
 pheromone_amount: 100
+iteration_count: 300
+trail_level_factor: 1.0
+attractiveness_factor: 1.5
