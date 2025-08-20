@@ -32,11 +32,7 @@ namespace TspAcoSolver
                         SetConfig(cmd[1]);
                         break;
                     case "solve":
-                        Stopwatch stopWatch = new();
-                        stopWatch.Start();
                         ITour sol = GetSolution();
-                        stopWatch.Stop();
-                        Console.WriteLine($"Time elapsed: {stopWatch.Elapsed}");
                         Console.WriteLine(sol);
                         Console.WriteLine($"Length: {sol.Length}");
 
@@ -78,8 +74,16 @@ namespace TspAcoSolver
 
         ITour GetSolution()
         {
+            Stopwatch stopWatch = new();
+            stopWatch.Start();
+
             Solver = new(Problem, sParams);
-            return Solver.Solve();
+            ITour res = Solver.Solve();
+
+            stopWatch.Stop();
+
+            Console.WriteLine($"Time elapsed: {stopWatch.Elapsed} | Iteration count: {Solver.CurrIterationCount}");
+            return res;
         }
     }
 }

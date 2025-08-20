@@ -1,7 +1,10 @@
 evaporation_coef: 0.8
 ant_count: 100
-thread_count: 3
+thread_count: 4
 pheromone_amount: 100
 iteration_count: 300
 trail_level_factor: 1.0
 attractiveness_factor: 1.5
+termination_rule: within_percentage
+ceiling_percentage: 5.0
+in_row_termination_count: 15

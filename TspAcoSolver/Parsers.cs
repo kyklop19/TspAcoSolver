@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.FileIO;
 
@@ -55,7 +56,7 @@ namespace TspAcoSolver
                             double[] coord = new double[strCoord.Length-1];
                             for (int i = 1; i < strCoord.Length; i++)
                             {
-                                coord[i-1] = Convert.ToDouble(strCoord[i]);
+                                coord[i-1] = Convert.ToDouble(strCoord[i], new CultureInfo("en-US"));
                             }
                             coords.Add(coord);
                         }

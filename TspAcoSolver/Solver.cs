@@ -25,7 +25,12 @@ namespace TspAcoSolver
         public int IterationCount { get; set; }
         public double TrailLevelFactor { get; set; }
         public double AttractivenessFactor { get; set; }
+        public string TerminationRule { get; set; }
+        public double CeilingPercentage { get; set; }
+        public int InRowTerminationCount { get; set; }
     }
+
+    delegate bool TerminationRule();
     public class Solver
     {
         IProblem problem;
@@ -37,6 +42,12 @@ namespace TspAcoSolver
         ITour _currBestTour = new InfiniteTour();
 
         int _currIterationCount = 0;
+        public int CurrIterationCount { get => _currIterationCount; }
+
+        ITour _minimumLengthSolInIter = new InfiniteTour();
+        int _inRowWithinPercentageCount = 0;
+
+        TerminationRule _terminated;
 
         public Solver(IProblem problem, SolvingParams sParams)
         {
@@ -45,17 +56,69 @@ namespace TspAcoSolver
 
             Graph = new PheromoneGraph(this.problem.ToGraph(), this.sParams.EvaporationCoef);
 
-            AntColony = new Colony(this.sParams.AntCount, this.sParams.TrailLevelFactor, this.sParams.AttractivenessFactor);
+            AntColony = new Colony(this.sParams.AntCount, this.sParams.ThreadCount ,this.sParams.TrailLevelFactor, this.sParams.AttractivenessFactor);
+
+            switch (this.sParams.TerminationRule)
+            {
+                case "fixed":
+                    _terminated = ReachedIterationCount;
+                    break;
+                case "within_percentage":
+                    _terminated = ReachedInRowCountWithinPercentage;
+                    break;
+            }
         }
 
-        bool IsTerminating()
+        bool ReachedInRowCountWithinPercentage()
+        {
+            double ceilingLength = _currBestTour.Length * (1 + (sParams.CeilingPercentage / 100));
+
+
+            if (_minimumLengthSolInIter.Length <= ceilingLength)
+            {
+                _inRowWithinPercentageCount++;
+            }
+            else
+            {
+                _inRowWithinPercentageCount = 0;
+            }
+            return _inRowWithinPercentageCount >= sParams.InRowTerminationCount;
+        }
+
+        bool ReachedIterationCount()
         {
             return _currIterationCount == sParams.IterationCount;
         }
 
+        List<Tour> PostprocessSolutions(List<Tour> solutions)
+        {
+            _minimumLengthSolInIter = new InfiniteTour();
+            foreach (Tour sol in solutions)
+            {
+                // Console.WriteLine(sol);
+
+                Console.WriteLine($" Lenght: {sol.Length}");
+
+                if (sol.Length < _minimumLengthSolInIter.Length)
+                {
+                    _minimumLengthSolInIter = sol;
+                }
+            }
+            if (_minimumLengthSolInIter.Length < _currBestTour.Length)
+            {
+                Console.WriteLine($"Found better tour");
+
+                _currBestTour = _minimumLengthSolInIter;
+                _inRowWithinPercentageCount = 0;
+                Console.WriteLine($"Best: {_currBestTour.Length}");
+            }
+
+            return solutions;
+        }
+
         void UpdatePheromones(List<Tour> solutions)
         {
-            double[,] pheromoneChange = new double[Graph.VertexCount,Graph.VertexCount];
+            double[,] pheromoneChange = new double[Graph.VertexCount, Graph.VertexCount];
 
             for (int i = 0; i < Graph.VertexCount; i++)
             {
@@ -80,25 +143,13 @@ namespace TspAcoSolver
         public ITour Solve()
         {
             _currBestTour = new InfiniteTour();
-            while (!IsTerminating())
+
+            _currIterationCount = 0;
+            List<Tour> solutions = new();
+            while (!_terminated())
             {
-                List<Tour> solutions = AntColony.GenerateSolutions(Graph);
-                foreach (Tour sol in solutions)
-                {
-                    // Console.WriteLine(sol);
-
-                    Console.WriteLine($" Lenght: {sol.Length}");
-
-
-                    if (sol.Length < _currBestTour.Length)
-                    {
-                        Console.WriteLine($"Found better tour");
-
-                        _currBestTour = sol;
-                        Console.WriteLine($"Best: {_currBestTour.Length}");
-                    }
-                }
-
+                solutions = AntColony.GenerateSolutions(Graph);
+                solutions = PostprocessSolutions(solutions);
                 UpdatePheromones(solutions);
 
                 _currIterationCount++;
