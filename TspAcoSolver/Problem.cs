@@ -48,16 +48,16 @@ namespace TspAcoSolver
 
     public abstract class SpaceTravelingSalesmanProblem : IProblem
     {
-        List<double[]> coords;
+        public List<double[]> Coords { get; init; }
 
-        public int Size { get => coords.Count; }
+        public int Size { get => Coords.Count; }
 
         public int Dimension { get; init; }
 
         public SpaceTravelingSalesmanProblem(int dimension, List<double[]> coords)
         {
             Dimension = dimension;
-            this.coords = coords;
+            this.Coords = coords;
         }
         public abstract double Distance(double[] coord1, double[] coord2);
         public WeightedGraph ToGraph()
@@ -67,7 +67,7 @@ namespace TspAcoSolver
             {
                 for (int j = 0; j < Size; j++)
                 {
-                    adjMat[i, j] = Distance(coords[i], coords[j]);
+                    adjMat[i, j] = Distance(Coords[i], Coords[j]);
                 }
             }
             return new WeightedGraph(adjMat);

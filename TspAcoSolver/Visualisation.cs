@@ -1,23 +1,33 @@
 using System.Windows.Forms.Design;
+using Microsoft.Msagl.Core.Layout;
+using Microsoft.Msagl.Drawing;
 
 namespace TspAcoSolver
 {
     public class Visualiser
     {
         PheromoneGraph _pheromoneGraph;
+        SpaceTravelingSalesmanProblem _problem;
         System.Windows.Forms.Form _form;
         Microsoft.Msagl.GraphViewerGdi.GViewer _viewer;
         Microsoft.Msagl.Drawing.Graph _graph;
 
         void VisualiseGraph()
         {
-            for (int source = 0; source < _pheromoneGraph.VertexCount; source++)
+            for (int i = 0; i < _problem.Size; i++)
             {
-                foreach (int target in _pheromoneGraph.AdjList[source])
-                {
-                    _graph.AddEdge($"{source}", $"{target}");
-                }
+                Microsoft.Msagl.Drawing.Node node = _graph.AddNode($"{i}");
             }
+            // for (int source = 0; source < _pheromoneGraph.VertexCount; source++)
+            // {
+            //     foreach (int target in _pheromoneGraph.AdjList[source])
+            //     {
+            //         Microsoft.Msagl.Drawing.Edge edge = _graph.AddEdge($"{source}", $"{_pheromoneGraph.Pheromones[source, target]}", $"{target}");
+            //         edge.Attr.Length = _pheromoneGraph.Weight(source, target);
+            //         // edge.Attr.LineWidth = _pheromoneGraph.Pheromones[source, target];
+            //     }
+            // }
+
 
             //create the graph content
             // for (int i = 0; i < 280; i++)
@@ -34,15 +44,25 @@ namespace TspAcoSolver
             // c.Attr.Shape = Microsoft.Msagl.Drawing.Shape.Diamond;
         }
 
-        public Visualiser(PheromoneGraph pheromoneGraph)
+        public Visualiser(PheromoneGraph pheromoneGraph, SpaceTravelingSalesmanProblem problem)
         {
             _pheromoneGraph = pheromoneGraph;
+            _problem = problem;
         }
         void Show()
         {
             _viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
             _graph = new Microsoft.Msagl.Drawing.Graph("graph");
             VisualiseGraph();
+            _viewer.Graph = _graph;
+            for (int i = 0; i < _problem.Size; i++)
+            {
+                Microsoft.Msagl.Drawing.Node node = _graph.FindNode($"{i}");
+                Microsoft.Msagl.Core.Geometry.Point point = new(_problem.Coords[i][0], _problem.Coords[i][1]);
+                node.GeometryNode.Center = point;
+
+            }
+            _viewer.Graph = null;
             _viewer.Graph = _graph;
             _form = new System.Windows.Forms.Form();
             _form.SuspendLayout();
