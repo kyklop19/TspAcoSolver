@@ -55,10 +55,12 @@ namespace TspAcoSolver
         public double EvaporationCoef { get; init; }
         public double InitialPheromoneAmount { get; init; }
         public double PheromoneAmount { get; init; }
+        public double DecayCoef { get; init; }
         public PheromoneGraph(double[,] adjMat, PheromoneParams pheromoneParams) : base(adjMat)
         {
             InitialPheromoneAmount = pheromoneParams.InitialPheromoneAmount;
             EvaporationCoef = pheromoneParams.EvaporationCoef;
+            DecayCoef = pheromoneParams.DecayCoef;
             PheromoneAmount = pheromoneParams.PheromoneAmount;
 
             Pheromones = new double[VertexCount, VertexCount];
@@ -76,6 +78,23 @@ namespace TspAcoSolver
         public void UpdatePheromonesOnEdge(int source, int target)
         {
 
+        }
+
+        public void UpdateLocallyPheromones(Tour solution)
+        {
+            for (int i = 0; i < solution.Vertices.Count - 1; i++)
+            {
+                int source = solution.Vertices[i];
+                int target = solution.Vertices[i + 1];
+                Pheromones[source, target] = ((1 - DecayCoef) * Pheromones[source, target]) + (DecayCoef * InitialPheromoneAmount);
+            }
+            if (solution.IsValid())
+            {
+                int source = solution.Vertices[solution.Vertices.Count - 1];
+                int target = solution.Vertices[0];
+                Pheromones[source, target] = ((1 - DecayCoef) * Pheromones[source, target]) + (DecayCoef * InitialPheromoneAmount);
+                //TODO: refactor
+            }
         }
 
         public void UpdatePheromonesOnWholeGraph(List<Tour> solutions)

@@ -20,6 +20,7 @@ namespace TspAcoSolver
     public class PheromoneParams
     {
         public double EvaporationCoef { get; set; }
+        public double DecayCoef { get; set; }
         public double InitialPheromoneAmount { get; set; }
         public double PheromoneAmount { get; set; }
     }
@@ -53,7 +54,7 @@ namespace TspAcoSolver
         SolvingParams sParams;
 
         PheromoneGraph Graph { get; init; }
-        Colony AntColony { get; init; }
+        AsColony AntColony { get; init; }
 
         ITour _currBestTour = new InfiniteTour();
 
@@ -72,7 +73,7 @@ namespace TspAcoSolver
 
             Graph = new PheromoneGraph(this.problem.ToGraph(), this.sParams.PheromoneParams);
 
-            AntColony = new Colony(this.sParams.ColonyParams);
+            AntColony = new AsColony(this.sParams.ColonyParams);
 
             switch (this.sParams.TerminationParams.TerminationRule)
             {

@@ -1,12 +1,12 @@
 namespace TspAcoSolver
 {
-    public class Colony
+    public abstract class ColonyBase
     {
         AsAnt[] _ants;
 
-        int _threadCount;
+        protected int _threadCount;
         public int AntCount { get => _ants.Length; }
-        public Colony(ColonyParams colonyParams)
+        public ColonyBase(ColonyParams colonyParams)
         {
             _ants = new AsAnt[colonyParams.AntCount];
             for (int i = 0; i < colonyParams.AntCount; i++)
@@ -17,29 +17,35 @@ namespace TspAcoSolver
             _threadCount = colonyParams.ThreadCount;
         }
 
-        // Tour Generate1Solution(PheromoneGraph graph, int antIndex)
-        // {
+        protected Tour Generate1Solution(PheromoneGraph graph, int antIndex)
+        {
+            AsAnt ant = _ants[antIndex];
+            ant.FindTour(graph);
+            return ant.LastTour;
+        }
 
-        // }
+        public abstract List<Tour> GenerateSolutions(PheromoneGraph graph);
+    }
 
+    public class AsColony : ColonyBase
+    {
+        public AsColony(ColonyParams colonyParams) : base(colonyParams){}
         List<Tour> GenerateSolutionsInRange(PheromoneGraph graph, int from, int to)
         {
             List<Tour> solutions = new();
             for (int i = from; i < to; i++)
             {
                 // Console.WriteLine($"Ant {i} solving in Thread {Thread.CurrentThread.ManagedThreadId}");
-
-                AsAnt ant = _ants[i];
-                ant.FindTour(graph);
-                if (ant.LastTour.IsValid())
+                Tour solution = Generate1Solution(graph, i);
+                if (solution.IsValid())
                 {
-                    solutions.Add(ant.LastTour);
+                    solutions.Add(solution);
                 }
             }
 
             return solutions;
         }
-        public List<Tour> GenerateSolutions(PheromoneGraph graph)
+        public override List<Tour> GenerateSolutions(PheromoneGraph graph)
         {
             List<Tour> solutions = new();
             Thread[] threads = new Thread[_threadCount];
@@ -75,6 +81,27 @@ namespace TspAcoSolver
             {
                 solutions.AddRange(results[i]);
             }
+            return solutions;
+        }
+    }
+
+    public class AcsColony : ColonyBase
+    {
+        public AcsColony(ColonyParams colonyParams) : base(colonyParams) { }
+
+        public override List<Tour> GenerateSolutions(PheromoneGraph graph)
+        {
+            List<Tour> solutions = new();
+            for (int i = 0; i < AntCount; i++)
+            {
+                Tour solution = Generate1Solution(graph, i);
+                graph.UpdateLocallyPheromones(solution);
+                if (solution.IsValid())
+                {
+                    solutions.Add(solution);
+                }
+            }
+
             return solutions;
         }
     }

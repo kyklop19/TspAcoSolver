@@ -1,5 +1,6 @@
 pheromone_params:
   evaporation_coef: 0.8
+  decay_coef: 0.3
   pheromone_amount: 100.0
   initial_pheromone_amount: 100
 termination_params:
