@@ -2,20 +2,25 @@ namespace TspAcoSolver
 {
     public class Colony
     {
-        Ant[] _ants;
+        AsAnt[] _ants;
 
         int _threadCount;
         public int AntCount { get => _ants.Length; }
-        public Colony(int antCount, int threadCount, double trailLevelFactor, double attractivenessFactor)
+        public Colony(ColonyParams colonyParams)
         {
-            _ants = new Ant[antCount];
-            for (int i = 0; i < antCount; i++)
+            _ants = new AsAnt[colonyParams.AntCount];
+            for (int i = 0; i < colonyParams.AntCount; i++)
             {
-                _ants[i] = new(trailLevelFactor, attractivenessFactor);
+                _ants[i] = new(colonyParams);
             }
 
-            _threadCount = threadCount;
+            _threadCount = colonyParams.ThreadCount;
         }
+
+        // Tour Generate1Solution(PheromoneGraph graph, int antIndex)
+        // {
+
+        // }
 
         List<Tour> GenerateSolutionsInRange(PheromoneGraph graph, int from, int to)
         {
@@ -24,7 +29,7 @@ namespace TspAcoSolver
             {
                 // Console.WriteLine($"Ant {i} solving in Thread {Thread.CurrentThread.ManagedThreadId}");
 
-                Ant ant = _ants[i];
+                AsAnt ant = _ants[i];
                 ant.FindTour(graph);
                 if (ant.LastTour.IsValid())
                 {

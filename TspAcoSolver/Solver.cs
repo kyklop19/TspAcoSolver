@@ -16,18 +16,34 @@ namespace TspAcoSolver
             return p;
         }
     }
-    public class SolvingParams
+
+    public class PheromoneParams
     {
         public double EvaporationCoef { get; set; }
+        public double InitialPheromoneAmount { get; set; }
+        public double PheromoneAmount { get; set; }
+    }
+    public class ColonyParams
+    {
         public int AntCount { get; set; }
         public int ThreadCount { get; set; }
-        public int PheromoneAmount { get; set; }
-        public int IterationCount { get; set; }
         public double TrailLevelFactor { get; set; }
         public double AttractivenessFactor { get; set; }
+        public double ExploProportionConst { get; set; }
+    }
+    public class TerminationParams
+    {
         public string TerminationRule { get; set; }
+        public int IterationCount { get; set; }
         public double CeilingPercentage { get; set; }
         public int InRowTerminationCount { get; set; }
+    }
+
+    public class SolvingParams
+    {
+        public PheromoneParams PheromoneParams { get; set; }
+        public TerminationParams TerminationParams { get; set; }
+        public ColonyParams ColonyParams { get; set; }
     }
 
     delegate bool TerminationRule();
@@ -54,11 +70,11 @@ namespace TspAcoSolver
             this.problem = problem;
             this.sParams = sParams;
 
-            Graph = new PheromoneGraph(this.problem.ToGraph(), this.sParams.EvaporationCoef);
+            Graph = new PheromoneGraph(this.problem.ToGraph(), this.sParams.PheromoneParams);
 
-            AntColony = new Colony(this.sParams.AntCount, this.sParams.ThreadCount ,this.sParams.TrailLevelFactor, this.sParams.AttractivenessFactor);
+            AntColony = new Colony(this.sParams.ColonyParams);
 
-            switch (this.sParams.TerminationRule)
+            switch (this.sParams.TerminationParams.TerminationRule)
             {
                 case "fixed":
                     _terminated = ReachedIterationCount;
@@ -71,7 +87,7 @@ namespace TspAcoSolver
 
         bool ReachedInRowCountWithinPercentage()
         {
-            double ceilingLength = _currBestTour.Length * (1 + (sParams.CeilingPercentage / 100));
+            double ceilingLength = _currBestTour.Length * (1 + (sParams.TerminationParams.CeilingPercentage / 100));
 
 
             if (_minimumLengthSolInIter.Length <= ceilingLength)
@@ -82,12 +98,12 @@ namespace TspAcoSolver
             {
                 _inRowWithinPercentageCount = 0;
             }
-            return _inRowWithinPercentageCount >= sParams.InRowTerminationCount;
+            return _inRowWithinPercentageCount >= sParams.TerminationParams.InRowTerminationCount;
         }
 
         bool ReachedIterationCount()
         {
-            return _currIterationCount == sParams.IterationCount;
+            return _currIterationCount == sParams.TerminationParams.IterationCount;
         }
 
         List<Tour> PostprocessSolutions(List<Tour> solutions)
@@ -116,30 +132,6 @@ namespace TspAcoSolver
             return solutions;
         }
 
-        void UpdatePheromones(List<Tour> solutions)
-        {
-            double[,] pheromoneChange = new double[Graph.VertexCount, Graph.VertexCount];
-
-            for (int i = 0; i < Graph.VertexCount; i++)
-            {
-                for (int j = 0; j < Graph.VertexCount; j++)
-                {
-                    pheromoneChange[i, j] = 0;
-                }
-            }
-            double updateAmount;
-            foreach (Tour sol in solutions)
-            {
-                updateAmount = sParams.PheromoneAmount / sol.Length;
-                for (int i = 0; i < sol.Vertices.Count - 1; i++)
-                {
-                    pheromoneChange[sol.Vertices[i], sol.Vertices[i + 1]] += updateAmount;
-                }
-            }
-
-            Graph.UpdatePheromones(pheromoneChange);
-        }
-
         public ITour Solve()
         {
             _currBestTour = new InfiniteTour();
@@ -150,7 +142,7 @@ namespace TspAcoSolver
             {
                 solutions = AntColony.GenerateSolutions(Graph);
                 solutions = PostprocessSolutions(solutions);
-                UpdatePheromones(solutions);
+                Graph.UpdatePheromonesOnWholeGraph(solutions);
 
                 _currIterationCount++;
             }

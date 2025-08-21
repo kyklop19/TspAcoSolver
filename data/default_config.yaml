@@ -1,10 +1,15 @@
-evaporation_coef: 0.8
-ant_count: 100
-thread_count: 4
-pheromone_amount: 100
-iteration_count: 300
-trail_level_factor: 2
-attractiveness_factor: 3
-termination_rule: within_percentage
-ceiling_percentage: 5.0
-in_row_termination_count: 25
+pheromone_params:
+  evaporation_coef: 0.8
+  pheromone_amount: 100.0
+  initial_pheromone_amount: 100
+termination_params:
+  termination_rule: within_percentage
+  iteration_count: 300
+  ceiling_percentage: 5.0
+  in_row_termination_count: 20
+colony_params:
+  ant_count: 100
+  thread_count: 4
+  trail_level_factor: 2
+  attractiveness_factor: 3
+  explo_proportion_const: 0.5

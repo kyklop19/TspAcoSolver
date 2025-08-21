@@ -13,7 +13,7 @@ namespace TspAcoSolver
             Config config = new();
             sParams = config.Read(@"../../../../data/default_config.yaml");
             // Console.WriteLine($"{Path.GetFullPath()}");
-            Console.WriteLine($"{sParams.AntCount}");
+            Console.WriteLine($"{sParams.ColonyParams.AntCount}");
 
         }
 

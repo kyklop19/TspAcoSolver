@@ -53,24 +53,53 @@ namespace TspAcoSolver
     {
         public double[,] Pheromones { get; set; }
         public double EvaporationCoef { get; init; }
-        public PheromoneGraph(double[,] adjMat, double evaporationCoef) : base(adjMat)
+        public double InitialPheromoneAmount { get; init; }
+        public double PheromoneAmount { get; init; }
+        public PheromoneGraph(double[,] adjMat, PheromoneParams pheromoneParams) : base(adjMat)
         {
-            const double StartingPheromoneCount = 100;
+            InitialPheromoneAmount = pheromoneParams.InitialPheromoneAmount;
+            EvaporationCoef = pheromoneParams.EvaporationCoef;
+            PheromoneAmount = pheromoneParams.PheromoneAmount;
+
             Pheromones = new double[VertexCount, VertexCount];
             for (int i = 0; i < VertexCount; i++)
             {
                 for (int j = 0; j < VertexCount; j++)
                 {
-                    Pheromones[i, j] = StartingPheromoneCount;
+                    Pheromones[i, j] = InitialPheromoneAmount;
                 }
             }
 
-            EvaporationCoef = evaporationCoef;
         }
-        public PheromoneGraph(WeightedGraph graph, double evaporationCoef) : this(graph.Weights, evaporationCoef) { }
+        public PheromoneGraph(WeightedGraph graph, PheromoneParams pheromoneParams) : this(graph.Weights, pheromoneParams) { }
 
-        public void UpdatePheromones(double[,] pheromoneChange)
+        public void UpdatePheromonesOnEdge(int source, int target)
         {
+
+        }
+
+        public void UpdatePheromonesOnWholeGraph(List<Tour> solutions)
+        {
+            double[,] pheromoneChange = new double[VertexCount, VertexCount];
+
+            for (int i = 0; i < VertexCount; i++)
+            {
+                for (int j = 0; j < VertexCount; j++)
+                {
+                    pheromoneChange[i, j] = 0;
+                }
+            }
+
+            double updateAmount;
+            foreach (Tour sol in solutions)
+            {
+                updateAmount = PheromoneAmount / sol.Length;
+                for (int i = 0; i < sol.Vertices.Count - 1; i++)
+                {
+                    pheromoneChange[sol.Vertices[i], sol.Vertices[i + 1]] += updateAmount;
+                }
+            }
+
             for (int i = 0; i < VertexCount; i++)
             {
                 for (int j = 0; j < VertexCount; j++)
