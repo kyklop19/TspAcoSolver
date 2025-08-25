@@ -14,7 +14,7 @@ namespace TspAcoSolver
 
         void VisualiseGraph()
         {
-            for (int i = 0; i < _problem.Size; i++)
+            for (int i = 0; i < _problem.CityCount; i++)
             {
                 Microsoft.Msagl.Drawing.Node node = _graph.AddNode($"{i}");
             }
@@ -55,7 +55,7 @@ namespace TspAcoSolver
             _graph = new Microsoft.Msagl.Drawing.Graph("graph");
             VisualiseGraph();
             _viewer.Graph = _graph;
-            for (int i = 0; i < _problem.Size; i++)
+            for (int i = 0; i < _problem.CityCount; i++)
             {
                 Microsoft.Msagl.Drawing.Node node = _graph.FindNode($"{i}");
                 Microsoft.Msagl.Core.Geometry.Point point = new(_problem.Coords[i][0], _problem.Coords[i][1]);

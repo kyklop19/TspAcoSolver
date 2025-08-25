@@ -4,7 +4,7 @@ namespace TspAcoSolver
 {
     public class Cli
     {
-        Solver Solver { get; set; }
+        SolverBase Solver { get; set; }
         IProblem Problem { get; set; }
         SolvingParams sParams { get; set; }
 
@@ -77,7 +77,16 @@ namespace TspAcoSolver
             Stopwatch stopWatch = new();
             stopWatch.Start();
 
-            Solver = new(Problem, sParams);
+            switch (sParams.Algorithm)
+            {
+                case "AS":
+                    Solver = new AsSolver(Problem, sParams);
+                    break;
+                case "ACS":
+                    Console.WriteLine($"Using ACS Solver");
+                    Solver = new AcsSolver(Problem, sParams);
+                    break;
+            }
             ITour res = Solver.Solve();
 
             stopWatch.Stop();

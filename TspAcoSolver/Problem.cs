@@ -2,6 +2,7 @@ namespace TspAcoSolver
 {
     public interface IProblem
     {
+        public int CityCount { get; }
         public WeightedGraph ToGraph();
     }
 
@@ -21,19 +22,19 @@ namespace TspAcoSolver
     public class TravelingSalesmanProblem : IProblem
     {
         List<Pathway> _pathways = new();
-        public int VertexCount { get; init; }
+        public int CityCount { get; init; }
 
         public TravelingSalesmanProblem(int vertexCount, List<Pathway> pathways)
         {
-            VertexCount = vertexCount;
+            CityCount = vertexCount;
             _pathways = pathways;
         }
         public WeightedGraph ToGraph()
         {
-            double[,] adjMat = new double[VertexCount, VertexCount];
-            for (int i = 0; i < VertexCount; i++)
+            double[,] adjMat = new double[CityCount, CityCount];
+            for (int i = 0; i < CityCount; i++)
             {
-                for (int j = 0; j < VertexCount; j++)
+                for (int j = 0; j < CityCount; j++)
                 {
                     adjMat[i, j] = 0;
                 }
@@ -50,7 +51,7 @@ namespace TspAcoSolver
     {
         public List<double[]> Coords { get; init; }
 
-        public int Size { get => Coords.Count; }
+        public int CityCount { get => Coords.Count; }
 
         public int Dimension { get; init; }
 
@@ -62,10 +63,10 @@ namespace TspAcoSolver
         public abstract double Distance(double[] coord1, double[] coord2);
         public WeightedGraph ToGraph()
         {
-            double[,] adjMat = new double[Size, Size];
-            for (int i = 0; i < Size; i++)
+            double[,] adjMat = new double[CityCount, CityCount];
+            for (int i = 0; i < CityCount; i++)
             {
-                for (int j = 0; j < Size; j++)
+                for (int j = 0; j < CityCount; j++)
                 {
                     adjMat[i, j] = Distance(Coords[i], Coords[j]);
                 }

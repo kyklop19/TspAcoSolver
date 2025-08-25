@@ -97,6 +97,37 @@ namespace TspAcoSolver
             }
         }
 
+        public void UpdateGloballyPheromones(List<Tour> solutions) //TODO: refactor
+        {
+            double[,] pheromoneChange = new double[VertexCount, VertexCount];
+
+            for (int i = 0; i < VertexCount; i++)
+            {
+                for (int j = 0; j < VertexCount; j++)
+                {
+                    pheromoneChange[i, j] = 0;
+                }
+            }
+
+            double updateAmount;
+            foreach (Tour sol in solutions)
+            {
+                updateAmount = PheromoneAmount / sol.Length;
+                for (int i = 0; i < sol.Vertices.Count - 1; i++)
+                {
+                    pheromoneChange[sol.Vertices[i], sol.Vertices[i + 1]] += updateAmount;
+                }
+            }
+
+            for (int i = 0; i < VertexCount; i++)
+            {
+                for (int j = 0; j < VertexCount; j++)
+                {
+                    Pheromones[i, j] = ((1 - EvaporationCoef) * Pheromones[i, j]) + (EvaporationCoef * pheromoneChange[i, j]);
+                }
+            }
+        }
+
         public void UpdatePheromonesOnWholeGraph(List<Tour> solutions)
         {
             double[,] pheromoneChange = new double[VertexCount, VertexCount];

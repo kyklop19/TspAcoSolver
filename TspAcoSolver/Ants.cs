@@ -1,19 +1,9 @@
 namespace TspAcoSolver
 {
-    public abstract class AntBase
+    public abstract class AntBaseBase
     {
-        public double TrailLevelFactor { get; init; }
-        public double AttractivenessFactor { get; init; }
-        public double ExploProportionConst { get; init; }
         public int CurrVertex { get; set; }
         public Tour LastTour { get; set; }
-
-        public AntBase(ColonyParams colonyParams)
-        {
-            TrailLevelFactor = colonyParams.TrailLevelFactor;
-            AttractivenessFactor = colonyParams.AttractivenessFactor;
-            ExploProportionConst = colonyParams.ExploProportionConst;
-        }
 
         public void FindTour(PheromoneGraph graph)
         {
@@ -29,6 +19,41 @@ namespace TspAcoSolver
                 LastTour.Add(CurrVertex);
             }
         }
+        protected abstract int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs);
+    }
+
+    public class NearestNbrAnt : AntBaseBase
+    {
+        protected override int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
+        {
+            double nearestNbrDist = graph.Weight(CurrVertex, unvisited_nbrs[0]);
+            int nearestNbrIndex = 0;
+            for (int i = 1; i < unvisited_nbrs.Count; i++)
+            {
+                double dist = graph.Weight(CurrVertex, unvisited_nbrs[i]);
+                if (dist > nearestNbrDist)
+                {
+                    nearestNbrDist = dist;
+                    nearestNbrIndex = i;
+                }
+            }
+            return unvisited_nbrs[nearestNbrIndex];
+        }
+    }
+
+    public abstract class AntBase : AntBaseBase
+    {
+        public double TrailLevelFactor { get; init; }
+        public double AttractivenessFactor { get; init; }
+        public double ExploProportionConst { get; init; }
+
+        public AntBase(ColonyParams colonyParams)
+        {
+            TrailLevelFactor = colonyParams.TrailLevelFactor;
+            AttractivenessFactor = colonyParams.AttractivenessFactor;
+            ExploProportionConst = colonyParams.ExploProportionConst;
+        }
+
 
         protected double ScoreEdge(PheromoneGraph graph, int nbr)
         {
@@ -74,7 +99,6 @@ namespace TspAcoSolver
             return unvisited_nbrs[index];
         }
 
-        protected abstract int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs);
     }
 
     public class AsAnt : AntBase
@@ -110,6 +134,8 @@ namespace TspAcoSolver
 
         protected override int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
+            Console.WriteLine($"Proportional rule");
+
             Random rnd = new();
             double rndNum = rnd.NextDouble();
             if (rndNum <= ExploProportionConst)

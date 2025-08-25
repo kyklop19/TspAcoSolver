@@ -2,24 +2,18 @@ namespace TspAcoSolver
 {
     public abstract class ColonyBase
     {
-        AsAnt[] _ants;
+        protected AntBase[] _ants;
 
         protected int _threadCount;
         public int AntCount { get => _ants.Length; }
         public ColonyBase(ColonyParams colonyParams)
         {
-            _ants = new AsAnt[colonyParams.AntCount];
-            for (int i = 0; i < colonyParams.AntCount; i++)
-            {
-                _ants[i] = new(colonyParams);
-            }
-
             _threadCount = colonyParams.ThreadCount;
         }
 
         protected Tour Generate1Solution(PheromoneGraph graph, int antIndex)
         {
-            AsAnt ant = _ants[antIndex];
+            AntBase ant = _ants[antIndex];
             ant.FindTour(graph);
             return ant.LastTour;
         }
@@ -29,7 +23,14 @@ namespace TspAcoSolver
 
     public class AsColony : ColonyBase
     {
-        public AsColony(ColonyParams colonyParams) : base(colonyParams){}
+        public AsColony(ColonyParams colonyParams) : base(colonyParams)
+        {
+            _ants = new AsAnt[colonyParams.AntCount];
+            for (int i = 0; i < colonyParams.AntCount; i++)
+            {
+                _ants[i] = new AsAnt(colonyParams);
+            }
+        }
         List<Tour> GenerateSolutionsInRange(PheromoneGraph graph, int from, int to)
         {
             List<Tour> solutions = new();
@@ -87,7 +88,14 @@ namespace TspAcoSolver
 
     public class AcsColony : ColonyBase
     {
-        public AcsColony(ColonyParams colonyParams) : base(colonyParams) { }
+        public AcsColony(ColonyParams colonyParams) : base(colonyParams)
+        {
+            _ants = new AcsAnt[colonyParams.AntCount];
+            for (int i = 0; i < colonyParams.AntCount; i++)
+            {
+                _ants[i] = new AcsAnt(colonyParams);
+            }
+        }
 
         public override List<Tour> GenerateSolutions(PheromoneGraph graph)
         {
@@ -95,6 +103,8 @@ namespace TspAcoSolver
             for (int i = 0; i < AntCount; i++)
             {
                 Tour solution = Generate1Solution(graph, i);
+                Console.WriteLine($"Local update");
+
                 graph.UpdateLocallyPheromones(solution);
                 if (solution.IsValid())
                 {

@@ -1,16 +1,18 @@
+algorithm: ACS
 pheromone_params:
-  evaporation_coef: 0.8
-  decay_coef: 0.3
-  pheromone_amount: 100.0
-  initial_pheromone_amount: 100
+  evaporation_coef: 0.1
+  decay_coef: 0.1
+  pheromone_amount: 1.0
+  calculate_initial_pheromone_amount: true
+  initial_pheromone_amount: 10.0
 termination_params:
   termination_rule: within_percentage
   iteration_count: 300
   ceiling_percentage: 5.0
-  in_row_termination_count: 20
+  in_row_termination_count: 25
 colony_params:
-  ant_count: 100
+  ant_count: 8
   thread_count: 4
   trail_level_factor: 2
-  attractiveness_factor: 3
-  explo_proportion_const: 0.5
+  attractiveness_factor: 4
+  explo_proportion_const: 0.9

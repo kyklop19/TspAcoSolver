@@ -21,6 +21,7 @@ namespace TspAcoSolver
     {
         public double EvaporationCoef { get; set; }
         public double DecayCoef { get; set; }
+        public bool CalculateInitialPheromoneAmount { get; set; }
         public double InitialPheromoneAmount { get; set; }
         public double PheromoneAmount { get; set; }
     }
@@ -42,6 +43,7 @@ namespace TspAcoSolver
 
     public class SolvingParams
     {
+        public string Algorithm { get; set; }
         public PheromoneParams PheromoneParams { get; set; }
         public TerminationParams TerminationParams { get; set; }
         public ColonyParams ColonyParams { get; set; }
