@@ -30,7 +30,7 @@ namespace TspAcoSolver
             if (_sParams.PheromoneParams.CalculateInitialPheromoneAmount)
             {
                 Console.WriteLine($"Calculating InitialPheromoneAmount");
-                NearestNbrAnt ant = new();
+                NearestNbrAnt ant = new((IRandom) new RandomGen());
                 ant.FindTour(Graph);
                 _sParams.PheromoneParams.InitialPheromoneAmount = 1 / (problem.CityCount * ant.LastTour.Length);
                 Console.WriteLine($"InitialPheromoneAmount: {_sParams.PheromoneParams.InitialPheromoneAmount}");
@@ -69,6 +69,14 @@ namespace TspAcoSolver
             return _currIterationCount == _sParams.TerminationParams.IterationCount;
         }
 
+        /// <summary>
+        /// Filter solutions such that only for returned solutions is the
+        /// <c>PheromoneGraph</c> updated.
+        /// </summary>
+        /// <param name="solutions">All found solutions</param>
+        /// <returns>
+        /// Solutions for which the <c>PheromoneGraph</c> should be updated
+        /// </returns>
         protected abstract List<Tour> FilterSolutions(List<Tour> solutions);
 
         List<Tour> PostprocessSolutions(List<Tour> solutions)
@@ -97,8 +105,24 @@ namespace TspAcoSolver
             return FilterSolutions(solutions);
         }
 
+        /// <summary>
+        /// Call update method of <c>PheromoneGraph</c> to update it with
+        /// filtered solutions.
+        /// </summary>
+        /// <param name="solutions">
+        /// Filtered solutions for which the <c>PheromoneGraph</c> should be
+        /// updated
+        /// </param>
         protected abstract void UpdatePheromones(List<Tour> solutions);
 
+        /// <summary>
+        /// Try to find tour of the problem with length as close as possible to
+        /// length of the optimal tour
+        /// </summary>
+        /// <returns><c>Tour</c> of the problem with length as close as possible to
+        /// length of the optimal tour or <c>InfiniteTour</c> if no
+        /// tours are found
+        /// </returns>
         public ITour Solve()
         {
             _currBestTour = new InfiniteTour();
@@ -117,7 +141,9 @@ namespace TspAcoSolver
         }
 
     }
-
+    /// <summary>
+    /// <c>AsSolver</c> is class for solving the traveling salesman problem using the Ant System algorithm.
+    /// </summary>
     public class AsSolver : SolverBase
     {
         public AsSolver(IProblem problem, SolvingParams sParams) : base(problem, sParams)
@@ -135,6 +161,10 @@ namespace TspAcoSolver
             Graph.UpdatePheromonesOnWholeGraph(solutions);
         }
     }
+
+    /// <summary>
+    /// <c>AcsSolver</c> is class for solving the traveling salesman problem using the Ant Colony System algorithm.
+    /// </summary>
     public class AcsSolver : SolverBase
     {
         public AcsSolver(IProblem problem, SolvingParams sParams) : base(problem, sParams)
@@ -154,7 +184,7 @@ namespace TspAcoSolver
 
         protected override void UpdatePheromones(List<Tour> solutions)
         {
-            Console.WriteLine($"Global update");
+            // Console.WriteLine($"Global update");
 
             Graph.UpdateGloballyPheromones(solutions);
         }

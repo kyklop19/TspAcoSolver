@@ -123,7 +123,10 @@ namespace TspAcoSolver
             {
                 for (int j = 0; j < VertexCount; j++)
                 {
-                    Pheromones[i, j] = ((1 - EvaporationCoef) * Pheromones[i, j]) + (EvaporationCoef * pheromoneChange[i, j]);
+                    // if (pheromoneChange[i, j] != 0)
+                    // {
+                        Pheromones[i, j] = ((1 - EvaporationCoef) * Pheromones[i, j]) + (EvaporationCoef * pheromoneChange[i, j]);
+                    // }
                 }
             }
         }

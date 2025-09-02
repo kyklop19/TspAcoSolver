@@ -2,7 +2,7 @@ namespace TspAcoSolver
 {
     public abstract class ColonyBase
     {
-        protected AntBase[] _ants;
+        protected RandomAntBase[] _ants;
 
         protected int _threadCount;
         public int AntCount { get => _ants.Length; }
@@ -13,7 +13,7 @@ namespace TspAcoSolver
 
         protected Tour Generate1Solution(PheromoneGraph graph, int antIndex)
         {
-            AntBase ant = _ants[antIndex];
+            RandomAntBase ant = _ants[antIndex];
             ant.FindTour(graph);
             return ant.LastTour;
         }
@@ -28,7 +28,7 @@ namespace TspAcoSolver
             _ants = new AsAnt[colonyParams.AntCount];
             for (int i = 0; i < colonyParams.AntCount; i++)
             {
-                _ants[i] = new AsAnt(colonyParams);
+                _ants[i] = new AsAnt(colonyParams, (IRandom) new RandomGen());
             }
         }
         List<Tour> GenerateSolutionsInRange(PheromoneGraph graph, int from, int to)
@@ -93,7 +93,7 @@ namespace TspAcoSolver
             _ants = new AcsAnt[colonyParams.AntCount];
             for (int i = 0; i < colonyParams.AntCount; i++)
             {
-                _ants[i] = new AcsAnt(colonyParams);
+                _ants[i] = new AcsAnt(colonyParams, (IRandom) new RandomGen());
             }
         }
 
@@ -103,7 +103,7 @@ namespace TspAcoSolver
             for (int i = 0; i < AntCount; i++)
             {
                 Tour solution = Generate1Solution(graph, i);
-                Console.WriteLine($"Local update");
+                // Console.WriteLine($"Local update");
 
                 graph.UpdateLocallyPheromones(solution);
                 if (solution.IsValid())

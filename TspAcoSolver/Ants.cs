@@ -1,15 +1,25 @@
 namespace TspAcoSolver
 {
-    public abstract class AntBaseBase
+    public abstract class AntBase
     {
         public int CurrVertex { get; set; }
         public Tour LastTour { get; set; }
 
+        protected IRandom rnd;
+
+        public AntBase(IRandom rnd)
+        {
+            this.rnd = rnd;
+        }
+
+        /// <summary>
+        /// Travel the <c>graph</c> and try to find near optimal tour
+        /// </summary>
+        /// <param name="graph">Pheromone graph in which the ant tries to find the tour</param>
         public void FindTour(PheromoneGraph graph)
         {
             LastTour = new(graph);
 
-            Random rnd = new Random();
             CurrVertex = rnd.Next(0, graph.VertexCount);
             LastTour.Add(CurrVertex);
 
@@ -22,8 +32,9 @@ namespace TspAcoSolver
         protected abstract int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs);
     }
 
-    public class NearestNbrAnt : AntBaseBase
+    public class NearestNbrAnt : AntBase
     {
+        public NearestNbrAnt(IRandom rnd) : base(rnd) { }
         protected override int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
             double nearestNbrDist = graph.Weight(CurrVertex, unvisited_nbrs[0]);
@@ -41,13 +52,13 @@ namespace TspAcoSolver
         }
     }
 
-    public abstract class AntBase : AntBaseBase
+    public abstract class RandomAntBase : AntBase
     {
         public double TrailLevelFactor { get; init; }
         public double AttractivenessFactor { get; init; }
         public double ExploProportionConst { get; init; }
 
-        public AntBase(ColonyParams colonyParams)
+        public RandomAntBase(ColonyParams colonyParams, IRandom rnd) : base(rnd)
         {
             TrailLevelFactor = colonyParams.TrailLevelFactor;
             AttractivenessFactor = colonyParams.AttractivenessFactor;
@@ -65,29 +76,14 @@ namespace TspAcoSolver
 
         protected int ChooseRandomNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
-            double sum = 0;
-
-            double[] probabilities = new double[unvisited_nbrs.Count];
+            double[] scores = new double[unvisited_nbrs.Count];
             for (int i = 0; i < unvisited_nbrs.Count; i++)
             {
                 double score = ScoreEdge(graph, unvisited_nbrs[i]);
-                probabilities[i] = score;
-                sum += score;
-            }
-            for (int i = 0; i < unvisited_nbrs.Count; i++)
-            {
-                probabilities[i] /= sum;
-                if (i != 0)
-                {
-                    probabilities[i] += probabilities[i - 1];
-                }
+                scores[i] = score;
             }
 
-            Random rnd = new();
-            double rndNum = rnd.NextDouble();
-            int index = 0;
-            while (index != probabilities.Length - 1 && rndNum > probabilities[index]) index++;
-
+            int index = new RandomFuncs(new RandomGen()).ChooseWeightBiased(scores);
             // System.Console.WriteLine($"Rnd: {rndNum}");
             // foreach (double prob in probabilities)
             // {
@@ -101,20 +97,20 @@ namespace TspAcoSolver
 
     }
 
-    public class AsAnt : AntBase
+    public class AsAnt : RandomAntBase
     {
-        public AsAnt(ColonyParams colonyParams)
-            : base(colonyParams) { }
+        public AsAnt(ColonyParams colonyParams, IRandom rnd)
+            : base(colonyParams, rnd) { }
         protected override int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
             return ChooseRandomNbr(graph, unvisited_nbrs);
         }
     }
 
-    public class AcsAnt : AntBase
+    public class AcsAnt : RandomAntBase
     {
-        public AcsAnt(ColonyParams colonyParams)
-            : base(colonyParams) { }
+        public AcsAnt(ColonyParams colonyParams, IRandom rnd)
+            : base(colonyParams, rnd) { }
 
         int ChooseBestNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
@@ -134,9 +130,8 @@ namespace TspAcoSolver
 
         protected override int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
-            Console.WriteLine($"Proportional rule");
+            // Console.WriteLine($"Proportional rule");
 
-            Random rnd = new();
             double rndNum = rnd.NextDouble();
             if (rndNum <= ExploProportionConst)
             {
