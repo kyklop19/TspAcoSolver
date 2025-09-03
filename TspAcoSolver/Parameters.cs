@@ -7,7 +7,7 @@ namespace TspAcoSolver
     {
         public SolvingParams Read(string path)
         {
-            using System.IO.StreamReader r = new(@"..\..\..\..\data\default_config.yaml");
+            using System.IO.StreamReader r = new(@"default_config.yaml");
             IDeserializer deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)  // see height_in_inches in sample yml
                 .Build();

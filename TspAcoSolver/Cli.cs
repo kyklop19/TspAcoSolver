@@ -1,75 +1,145 @@
+using System.CommandLine;
+using System.CommandLine.Help;
 using System.Diagnostics;
 
 namespace TspAcoSolver
 {
+    public enum ProblemType
+    {
+        Tsp,
+        Euc2D,
+    }
+
+    /// <summary>
+    /// <c>Cli</c> represents user interface for reading problems from files, set solving parameters and running solvers.
+    /// </summary>
     public class Cli
     {
-        SolverBase Solver { get; set; }
-        IProblem Problem { get; set; }
-        SolvingParams sParams { get; set; }
+        SolverBase _solver;
+        IProblem _problem;
+        SolvingParams _sParams;
 
+        Dictionary<string, Command> _commands;
+        bool _quit = false;
         public Cli()
         {
             Config config = new();
-            sParams = config.Read(@"../../../../data/default_config.yaml");
+            _sParams = config.Read(@"default_config.yaml"); // ../../../../
             // Console.WriteLine($"{Path.GetFullPath()}");
-            Console.WriteLine($"{sParams.ColonyParams.AntCount}");
+            Console.WriteLine($"{_sParams.ColonyParams.AntCount}");
 
+            CreateCommands();
+        }
+        void CreateCommands()
+        {
+            HelpOption helpOption = new();
+
+            const string quitCmdName = "quit";
+
+            Command quitCommand = new(quitCmdName, "Quit the program");
+            quitCommand.Options.Add(helpOption);
+            quitCommand.SetAction(parseResult =>
+            {
+                Quit();
+            });
+
+            const string solveCmdName = "solve";
+
+            Command solveCommand = new(solveCmdName, "Solve problem");
+            solveCommand.Options.Add(helpOption);
+            solveCommand.SetAction(parseResult =>
+            {
+                ITour sol = GetSolution();
+                Console.WriteLine(sol);
+                Console.WriteLine($"Length: {sol.Length}");
+            });
+
+            const string confCmdName = "conf";
+
+            Argument<string> pathArg = new("path");
+            Command confCommand = new(confCmdName, "Set config");
+
+            confCommand.Arguments.Add(pathArg);
+
+            confCommand.Options.Add(helpOption);
+
+            confCommand.SetAction(parseResult =>
+            {
+                SetConfig(parseResult.GetValue(pathArg));
+            });
+
+            const string probCmdName = "prob";
+
+            Argument<string> problemPathArg = new("path");
+            Option<ProblemType?> problemTypeOpt = new("--type", ["-t"]);
+            Command probCommand = new(probCmdName, "Set problem");
+
+            probCommand.Arguments.Add(problemPathArg);
+
+            probCommand.Options.Add(helpOption);
+            probCommand.Options.Add(problemTypeOpt);
+
+            probCommand.SetAction(parseResult =>
+            {
+                SetProblem(parseResult.GetValue(problemPathArg), parseResult.GetValue(problemTypeOpt));
+            });
+
+            _commands = new()
+            {
+                {quitCmdName, quitCommand},
+                {solveCmdName, solveCommand},
+                {confCmdName, confCommand},
+                {probCmdName, probCommand},
+            };
         }
 
         public void Run()
         {
-            bool quit = false;
-            while (!quit)
+            while (!_quit)
             {
-                string[] cmd = Console.ReadLine().Split(" ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                switch (cmd[0])
+                string? input = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(input)) continue;
+                string[] cmd = input.Split(" ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                if (_commands.TryGetValue(cmd[0], out Command command))
                 {
-                    case "prob":
-                        SetProblem(cmd[1], cmd[2]);
-                        break;
-                    case "conf":
-                        SetConfig(cmd[1]);
-                        break;
-                    case "solve":
-                        ITour sol = GetSolution();
-                        Console.WriteLine(sol);
-                        Console.WriteLine($"Length: {sol.Length}");
-
-                        break;
-                    case "quit":
-                        quit = true;
-                        break;
-                    default:
-                        Console.WriteLine("Invalid command");
-                        break;
+                    ParseResult parseResult = command.Parse(cmd[1..]);
+                    parseResult.Invoke();
+                }
+                else
+                {
+                    Console.WriteLine($"Invalid command: {cmd[0]}");
                 }
             }
         }
 
-        void SetProblem(string problemType, string path)
+        void SetProblem(string path, ProblemType? problemType)
         {
             if (path.EndsWith(".csv"))
             {
-                switch (problemType.ToLower())
+                switch (problemType)
                 {
-                    case "tsp":
+                    case null:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Csv file needs specified problem type. Use \"--type\" option.");
+                        Console.ResetColor();
+                        break;
+                    case ProblemType.Tsp:
                         CsvParser csvParser = new();
-                        Problem = csvParser.Parse(path);
+                        _problem = csvParser.Parse(path);
                         break;
                 }
             }
             else if (path.EndsWith(".tsp"))
             {
                 TspParser tspParser = new();
-                Problem = tspParser.Parse(path);
+                _problem = tspParser.Parse(path);
             }
         }
 
         void SetConfig(string path)
         {
             Config config = new();
-            sParams = config.Read(path);
+            _sParams = config.Read(path);
         }
 
         ITour GetSolution()
@@ -77,22 +147,26 @@ namespace TspAcoSolver
             Stopwatch stopWatch = new();
             stopWatch.Start();
 
-            switch (sParams.Algorithm)
+            switch (_sParams.Algorithm)
             {
                 case "AS":
-                    Solver = new AsSolver(Problem, sParams);
+                    _solver = new AsSolver(_problem, _sParams);
                     break;
                 case "ACS":
                     Console.WriteLine($"Using ACS Solver");
-                    Solver = new AcsSolver(Problem, sParams);
+                    _solver = new AcsSolver(_problem, _sParams);
                     break;
             }
-            ITour res = Solver.Solve();
+            ITour res = _solver.Solve();
 
             stopWatch.Stop();
 
-            Console.WriteLine($"Time elapsed: {stopWatch.Elapsed} | Iteration count: {Solver.CurrIterationCount}");
+            Console.WriteLine($"Time elapsed: {stopWatch.Elapsed} | Iteration count: {_solver.CurrIterationCount}");
             return res;
+        }
+        void Quit()
+        {
+            _quit = true;
         }
     }
 }

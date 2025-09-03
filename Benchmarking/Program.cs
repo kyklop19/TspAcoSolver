@@ -24,7 +24,7 @@ class Program
         };
 
         TspParser parser = new();
-        SolvingParams sParams = new Config().Read(@"../../../../data/default_config.yaml");
+        SolvingParams sParams = new Config().Read(@"default_config.yaml");
 
         int toProcess = problems.Length;
 
