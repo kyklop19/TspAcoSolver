@@ -35,20 +35,20 @@ namespace TspAcoSolver
     public class NearestNbrAnt : AntBase
     {
         public NearestNbrAnt(IRandom rnd) : base(rnd) { }
-        protected override int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
+        protected override int ChooseNbr(PheromoneGraph graph, List<int> unvisitedNbrs)
         {
-            double nearestNbrDist = graph.Weight(CurrVertex, unvisited_nbrs[0]);
+            double nearestNbrDist = graph.Weight(CurrVertex, unvisitedNbrs[0]);
             int nearestNbrIndex = 0;
-            for (int i = 1; i < unvisited_nbrs.Count; i++)
+            for (int i = 1; i < unvisitedNbrs.Count; i++)
             {
-                double dist = graph.Weight(CurrVertex, unvisited_nbrs[i]);
+                double dist = graph.Weight(CurrVertex, unvisitedNbrs[i]);
                 if (dist > nearestNbrDist)
                 {
                     nearestNbrDist = dist;
                     nearestNbrIndex = i;
                 }
             }
-            return unvisited_nbrs[nearestNbrIndex];
+            return unvisitedNbrs[nearestNbrIndex];
         }
     }
 
