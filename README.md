@@ -7,3 +7,7 @@
 - Načítání problémů z formátů `.csv` a `.tsp`
 - Vlastní nastavení parametrů algoritmu
 - Algoritmy *Ant system* a *Ant colony system* pro řešení problému
+
+***
+
+Pro více informací nahlédněte do [Dokumentace](https://kyklop19.github.io/TspAcoSolver/).

@@ -26,7 +26,7 @@ namespace TspAcoSolver
             Config config = new();
             _sParams = config.Read(@"default_config.yaml"); // ../../../../
             // Console.WriteLine($"{Path.GetFullPath()}");
-            Console.WriteLine($"{_sParams.ColonyParams.AntCount}");
+            Console.WriteLine($"{_sParams}");
 
             CreateCommands();
         }
@@ -140,6 +140,8 @@ namespace TspAcoSolver
         {
             Config config = new();
             _sParams = config.Read(path);
+            Console.WriteLine($"{_sParams}");
+
         }
 
         ITour GetSolution()

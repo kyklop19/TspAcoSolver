@@ -136,6 +136,12 @@ namespace TspAcoSolver
                 UpdatePheromones(solutions);
 
                 _currIterationCount++;
+                Console.WriteLine($"{_currIterationCount}");
+
+                if (_currIterationCount % 100 == 0)
+                {
+                    Graph.Reinitialize();
+                }
             }
             return _currBestTour;
         }

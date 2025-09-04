@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="../data/default_config.yaml">
+    <Content Include="../config/default_config.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

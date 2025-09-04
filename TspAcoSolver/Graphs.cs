@@ -56,6 +56,8 @@ namespace TspAcoSolver
         public double InitialPheromoneAmount { get; init; }
         public double PheromoneAmount { get; init; }
         public double DecayCoef { get; init; }
+
+        double minimumPheromoneAmount;
         public PheromoneGraph(double[,] adjMat, PheromoneParams pheromoneParams) : base(adjMat)
         {
             InitialPheromoneAmount = pheromoneParams.InitialPheromoneAmount;
@@ -63,8 +65,10 @@ namespace TspAcoSolver
             DecayCoef = pheromoneParams.DecayCoef;
             PheromoneAmount = pheromoneParams.PheromoneAmount;
 
+            minimumPheromoneAmount = InitialPheromoneAmount / 1000;
+
             Pheromones = new double[VertexCount, VertexCount];
-            for (int i = 0; i < VertexCount; i++)
+            for (int i = 0; i < VertexCount; i++) //TODO: replace with reinitialize
             {
                 for (int j = 0; j < VertexCount; j++)
                 {
@@ -82,17 +86,19 @@ namespace TspAcoSolver
 
         public void UpdateLocallyPheromones(Tour solution)
         {
+            Console.WriteLine($"{minimumPheromoneAmount > 0}");
+
             for (int i = 0; i < solution.Vertices.Count - 1; i++)
             {
                 int source = solution.Vertices[i];
                 int target = solution.Vertices[i + 1];
-                Pheromones[source, target] = ((1 - DecayCoef) * Pheromones[source, target]) + (DecayCoef * InitialPheromoneAmount);
+                Pheromones[source, target] = Math.Max(((1 - DecayCoef) * Pheromones[source, target]) + (DecayCoef * InitialPheromoneAmount), minimumPheromoneAmount);
             }
             if (solution.IsValid())
             {
                 int source = solution.Vertices[solution.Vertices.Count - 1];
                 int target = solution.Vertices[0];
-                Pheromones[source, target] = ((1 - DecayCoef) * Pheromones[source, target]) + (DecayCoef * InitialPheromoneAmount);
+                Pheromones[source, target] = Math.Max(((1 - DecayCoef) * Pheromones[source, target]) + (DecayCoef * InitialPheromoneAmount), minimumPheromoneAmount);
                 //TODO: refactor
             }
         }
@@ -117,6 +123,7 @@ namespace TspAcoSolver
                 {
                     pheromoneChange[sol.Vertices[i], sol.Vertices[i + 1]] += updateAmount;
                 }
+                pheromoneChange[sol.Vertices[^1], sol.Vertices[0]] += updateAmount;
             }
 
             for (int i = 0; i < VertexCount; i++)
@@ -125,9 +132,13 @@ namespace TspAcoSolver
                 {
                     // if (pheromoneChange[i, j] != 0)
                     // {
-                        Pheromones[i, j] = ((1 - EvaporationCoef) * Pheromones[i, j]) + (EvaporationCoef * pheromoneChange[i, j]);
+                    Pheromones[i, j] = Math.Max(((1 - EvaporationCoef) * Pheromones[i, j]) + (EvaporationCoef * pheromoneChange[i, j]), minimumPheromoneAmount);
                     // }
+                    // Console.Write($"{Double.Round(Pheromones[i, j], 1)} ");
+
                 }
+                // Console.WriteLine($"");
+
             }
         }
 
@@ -160,6 +171,17 @@ namespace TspAcoSolver
                     Pheromones[i, j] = (1 - EvaporationCoef) * Pheromones[i, j] + pheromoneChange[i, j];
                 }
             }
+        }
+
+        public void Reinitialize()
+        {
+        for (int i = 0; i < VertexCount; i++)
+        {
+            for (int j = 0; j < VertexCount; j++)
+            {
+                Pheromones[i, j] = InitialPheromoneAmount;
+            }
+        }
         }
     }
 }

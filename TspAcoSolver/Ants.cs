@@ -1,5 +1,8 @@
 namespace TspAcoSolver
 {
+    /// <summary>
+    /// <c>AntBase</c> is abstract class intended for finding tour in given pheromone graph.
+    /// </summary>
     public abstract class AntBase
     {
         public int CurrVertex { get; set; }
@@ -32,6 +35,10 @@ namespace TspAcoSolver
         protected abstract int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs);
     }
 
+    /// <summary>
+    /// <c>NearestNbrAnt</c> is class intended for finding tour in given
+    /// pheromone graph by always choosing the closest vertex.
+    /// </summary>
     public class NearestNbrAnt : AntBase
     {
         public NearestNbrAnt(IRandom rnd) : base(rnd) { }
@@ -52,6 +59,11 @@ namespace TspAcoSolver
         }
     }
 
+    /// <summary>
+    /// <c>RandomAntBase</c> is abstract class intended for finding tour in
+    /// given pheromone graph. Additionally it's equipped with method for
+    /// choosing random neighbor biased by length of edge and its pheromone amount.
+    /// </summary>
     public abstract class RandomAntBase : AntBase
     {
         public double TrailLevelFactor { get; init; }
@@ -65,7 +77,14 @@ namespace TspAcoSolver
             ExploProportionConst = colonyParams.ExploProportionConst;
         }
 
-
+        /// <summary>
+        /// Calculate score of edge from <c>CurrVertex</c> to <c>nbr</c>
+        /// where score has higher value with shorter edges and higher amount
+        /// of pheromones.
+        /// </summary>
+        /// <param name="graph">Pheromone graph in which to calculate score of its edge</param>
+        /// <param name="nbr">Vertex to which goes from <c>CurrVertex</c> the edge</param>
+        /// <returns>Score of the edge based on its length and pheromone amount</returns>
         protected double ScoreEdge(PheromoneGraph graph, int nbr)
         {
             double attractiveness = 1 / graph.Weight(CurrVertex, nbr);

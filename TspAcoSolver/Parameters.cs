@@ -7,7 +7,7 @@ namespace TspAcoSolver
     {
         public SolvingParams Read(string path)
         {
-            using System.IO.StreamReader r = new(@"default_config.yaml");
+            using System.IO.StreamReader r = new(path);
             IDeserializer deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)  // see height_in_inches in sample yml
                 .Build();
@@ -24,6 +24,17 @@ namespace TspAcoSolver
         public bool CalculateInitialPheromoneAmount { get; set; }
         public double InitialPheromoneAmount { get; set; }
         public double PheromoneAmount { get; set; }
+
+        public override string ToString()
+        {
+            return $"""
+                    EvaporationCoef: {EvaporationCoef}
+                    DecayCoef: {DecayCoef}
+                    CalculateInitialPheromoneAmount: {CalculateInitialPheromoneAmount}
+                    InitialPheromoneAmount: {InitialPheromoneAmount}
+                    PheromoneAmount: {PheromoneAmount}
+                    """;
+        }
     }
     public class ColonyParams
     {
@@ -32,6 +43,17 @@ namespace TspAcoSolver
         public double TrailLevelFactor { get; set; }
         public double AttractivenessFactor { get; set; }
         public double ExploProportionConst { get; set; }
+
+        public override string ToString()
+        {
+            return $"""
+                    AntCount: {AntCount}
+                    ThreadCount: {ThreadCount}
+                    TrailLevelFactor: {TrailLevelFactor}
+                    AttractivenessFactor: {AttractivenessFactor}
+                    ExploProportionConst: {ExploProportionConst}
+                    """;
+        }
     }
     public class TerminationParams
     {
@@ -39,6 +61,16 @@ namespace TspAcoSolver
         public int IterationCount { get; set; }
         public double CeilingPercentage { get; set; }
         public int InRowTerminationCount { get; set; }
+
+        public override string ToString()
+        {
+            return $"""
+                    TerminationRule: {TerminationRule}
+                    IterationCount: {IterationCount}
+                    CeilingPercentage: {CeilingPercentage}
+                    InRowTerminationCount: {InRowTerminationCount}
+                    """;
+        }
     }
 
     public class SolvingParams
@@ -47,5 +79,18 @@ namespace TspAcoSolver
         public PheromoneParams PheromoneParams { get; set; }
         public TerminationParams TerminationParams { get; set; }
         public ColonyParams ColonyParams { get; set; }
+
+        public override string ToString()
+        {
+            return $"""
+                    Algorithm: {Algorithm}
+                    PheromoneParams:
+                        {PheromoneParams.ToString().Replace("\n", "\n    ")}
+                    TerminationParams:
+                        {TerminationParams.ToString().Replace("\n", "\n    ")}
+                    ColonyParams:
+                        {ColonyParams.ToString().Replace("\n", "\n    ")}
+                    """;
+        }
     }
 }

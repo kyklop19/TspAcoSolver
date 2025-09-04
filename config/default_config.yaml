@@ -9,7 +9,7 @@ termination_params:
   termination_rule: within_percentage
   iteration_count: 300
   ceiling_percentage: 5.0
-  in_row_termination_count: 10
+  in_row_termination_count: 20
 colony_params:
   ant_count: 8
   thread_count: 4
