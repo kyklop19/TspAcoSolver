@@ -13,6 +13,10 @@
   <ItemGroup>
     <!-- <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" /> -->
 
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
+
     <PackageReference Include="Msagl" Version="1.2.1" />
     <PackageReference Include="Msagl.Drawing" Version="1.2.1" />
     <PackageReference Include="Msagl.GraphViewerGDI" Version="1.2.1" />

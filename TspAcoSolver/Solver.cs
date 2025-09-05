@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+
 namespace TspAcoSolver
 {
     delegate bool TerminationRule();
@@ -6,8 +9,8 @@ namespace TspAcoSolver
         IProblem _problem;
         protected SolvingParams _sParams;
 
-        protected PheromoneGraph Graph { get; init; }
-        protected ColonyBase AntColony { get; init; }
+        protected PheromoneGraph Graph;
+        protected IColony AntColony { get; init; }
 
         ITour _currBestTour = new InfiniteTour();
 
@@ -19,25 +22,12 @@ namespace TspAcoSolver
 
         TerminationRule _terminated;
 
-        public SolverBase(IProblem problem, SolvingParams sParams)
+        public SolverBase(IColony colony, IOptions<SolvingParams> sParams)
         {
-            _problem = problem;
-            _sParams = sParams;
+            AntColony = colony;
+            _sParams = sParams.Value;
 
-
-            Graph = new PheromoneGraph(_problem.ToGraph(), _sParams.PheromoneParams);
-
-            if (_sParams.PheromoneParams.CalculateInitialPheromoneAmount)
-            {
-                Console.WriteLine($"Calculating InitialPheromoneAmount");
-                NearestNbrAnt ant = new((IRandom) new RandomGen());
-                ant.FindTour(Graph);
-                _sParams.PheromoneParams.InitialPheromoneAmount = 1 / (problem.CityCount * ant.LastTour.Length);
-                Console.WriteLine($"InitialPheromoneAmount: {_sParams.PheromoneParams.InitialPheromoneAmount}");
-
-            }
-
-            switch (this._sParams.TerminationParams.TerminationRule)
+            switch (_sParams.TerminationParams.TerminationRule)
             {
                 case "fixed":
                     _terminated = ReachedIterationCount;
@@ -123,8 +113,10 @@ namespace TspAcoSolver
         /// length of the optimal tour or <c>InfiniteTour</c> if no
         /// tours are found
         /// </returns>
-        public ITour Solve()
+        public ITour Solve(IProblem problem)
         {
+            _problem = problem;
+            Graph = new PheromoneGraph(_problem.ToGraph(), _sParams.PheromoneParams);
             _currBestTour = new InfiniteTour();
 
             _currIterationCount = 0;
@@ -152,10 +144,7 @@ namespace TspAcoSolver
     /// </summary>
     public class AsSolver : SolverBase
     {
-        public AsSolver(IProblem problem, SolvingParams sParams) : base(problem, sParams)
-        {
-            AntColony = new AsColony(this._sParams.ColonyParams);
-        }
+        public AsSolver(IColony colony, IOptions<SolvingParams> sParams) : base(colony, sParams){}
 
         protected override List<Tour> FilterSolutions(List<Tour> solutions)
         {
@@ -173,10 +162,7 @@ namespace TspAcoSolver
     /// </summary>
     public class AcsSolver : SolverBase
     {
-        public AcsSolver(IProblem problem, SolvingParams sParams) : base(problem, sParams)
-        {
-            AntColony = new AcsColony(this._sParams.ColonyParams);
-        }
+        public AcsSolver(IColony colony, IOptions<SolvingParams> sParams) : base(colony, sParams){}
 
         protected override List<Tour> FilterSolutions(List<Tour> solutions)
         {

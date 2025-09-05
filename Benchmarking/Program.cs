@@ -1,5 +1,8 @@
 ﻿using System;
+using System.CommandLine;
 using TspAcoSolver;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 public record ProbTest(string name, double optLen);
 
@@ -24,7 +27,7 @@ class Program
         };
 
         TspParser parser = new();
-        SolvingParams sParams = new Config().Read(@"default_config.yaml");
+        SolvingParams solvingParams = new Config().Read(@"default_config.yaml");
 
         int toProcess = problems.Length;
 
@@ -38,8 +41,34 @@ class Program
                 ThreadPool.QueueUserWorkItem(
                     new WaitCallback((object x) =>
                     {
-                        AcsSolver solver = new((IProblem)x, sParams);
-                        ITour sol = solver.Solve();
+                        ServiceCollection serviceCollection = new();
+                        serviceCollection.Configure<SolvingParams>(sParams =>
+                        {
+                            sParams.Algorithm = solvingParams.Algorithm;
+                            sParams.PheromoneParams = solvingParams.PheromoneParams;
+                            sParams.TerminationParams = solvingParams.TerminationParams;
+                            sParams.ColonyParams = solvingParams.ColonyParams;
+                        });
+                        serviceCollection.Configure<ColonyParams>(cParams =>
+                        {
+                            cParams.AntCount = solvingParams.ColonyParams.AntCount;
+                            cParams.ThreadCount = solvingParams.ColonyParams.ThreadCount;
+                            cParams.TrailLevelFactor = solvingParams.ColonyParams.TrailLevelFactor;
+                            cParams.AttractivenessFactor = solvingParams.ColonyParams.AttractivenessFactor;
+                            cParams.ExploProportionConst = solvingParams.ColonyParams.ExploProportionConst;
+                        });
+
+                        serviceCollection.AddSingleton<IRandom, RandomGen>();
+
+                        serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AcsAnt>>();
+                        serviceCollection.AddTransient<IColony, AcsColony>();
+                        serviceCollection.AddTransient<SolverBase, AcsSolver>();
+
+                        ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+                        SolverBase solver = serviceProvider.GetService<SolverBase>();
+
+                        // AcsSolver solver = new(Options.Create(sParams));
+                        ITour sol = solver.Solve((IProblem)x);
                         lock (threadLock)
                         {
                             results.Add(new(problem.name, solver.CurrIterationCount, sol.Length, CalcErr(problem.optLen, sol.Length)));

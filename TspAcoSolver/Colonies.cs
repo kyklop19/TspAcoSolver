@@ -1,19 +1,27 @@
+using Microsoft.Extensions.Options;
+
 namespace TspAcoSolver
 {
-    public abstract class ColonyBase
+
+    public interface IColony
     {
-        protected RandomAntBase[] _ants;
+        public List<Tour> GenerateSolutions(PheromoneGraph graph);
+    }
+    public abstract class ColonyBase : IColony
+    {
+        protected IAnt[] _ants;
 
         protected int _threadCount;
         public int AntCount { get => _ants.Length; }
-        public ColonyBase(ColonyParams colonyParams)
+        public ColonyBase(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParams)
         {
-            _threadCount = colonyParams.ThreadCount;
+            _ants = antFactory.CreateAnts(colonyParams.Value.AntCount);
+            _threadCount = colonyParams.Value.ThreadCount;
         }
 
         protected Tour Generate1Solution(PheromoneGraph graph, int antIndex)
         {
-            RandomAntBase ant = _ants[antIndex];
+            IAnt ant = _ants[antIndex];
             ant.FindTour(graph);
             return ant.LastTour;
         }
@@ -23,14 +31,7 @@ namespace TspAcoSolver
 
     public class AsColony : ColonyBase
     {
-        public AsColony(ColonyParams colonyParams) : base(colonyParams)
-        {
-            _ants = new AsAnt[colonyParams.AntCount];
-            for (int i = 0; i < colonyParams.AntCount; i++)
-            {
-                _ants[i] = new AsAnt(colonyParams, (IRandom) new RandomGen());
-            }
-        }
+        public AsColony(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParamsOpt) : base(antFactory, colonyParamsOpt){}
         List<Tour> GenerateSolutionsInRange(PheromoneGraph graph, int from, int to)
         {
             List<Tour> solutions = new();
@@ -88,14 +89,7 @@ namespace TspAcoSolver
 
     public class AcsColony : ColonyBase
     {
-        public AcsColony(ColonyParams colonyParams) : base(colonyParams)
-        {
-            _ants = new AcsAnt[colonyParams.AntCount];
-            for (int i = 0; i < colonyParams.AntCount; i++)
-            {
-                _ants[i] = new AcsAnt(colonyParams, (IRandom) new RandomGen());
-            }
-        }
+        public AcsColony(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParamsOpt) : base(antFactory, colonyParamsOpt){}
 
         public override List<Tour> GenerateSolutions(PheromoneGraph graph)
         {

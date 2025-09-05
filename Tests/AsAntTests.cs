@@ -1,4 +1,5 @@
-﻿using TspAcoSolver;
+﻿using Microsoft.Extensions.Options;
+using TspAcoSolver;
 
 namespace Tests;
 
@@ -26,7 +27,7 @@ public sealed class AsAntTests
     public void TestFindTour()
     {
 
-        AsAnt ant = new(_cParams, new MockRandom([1]));
+        AsAnt ant = new(Options.Create(_cParams), new MockRandom([1]));
 
         WeightedGraph wGraph = new(new double[,]
         {

@@ -1,6 +1,8 @@
 using System.CommandLine;
 using System.CommandLine.Help;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace TspAcoSolver
 {
@@ -149,17 +151,44 @@ namespace TspAcoSolver
             Stopwatch stopWatch = new();
             stopWatch.Start();
 
+            ServiceCollection serviceCollection = new();
+            serviceCollection.Configure<SolvingParams>(sParams =>
+            {
+                sParams.Algorithm = _sParams.Algorithm;
+                sParams.PheromoneParams = _sParams.PheromoneParams;
+                sParams.TerminationParams = _sParams.TerminationParams;
+                sParams.ColonyParams = _sParams.ColonyParams;
+            });
+            serviceCollection.Configure<ColonyParams>(cParams =>
+            {
+                cParams.AntCount = _sParams.ColonyParams.AntCount;
+                cParams.ThreadCount = _sParams.ColonyParams.ThreadCount;
+                cParams.TrailLevelFactor = _sParams.ColonyParams.TrailLevelFactor;
+                cParams.AttractivenessFactor = _sParams.ColonyParams.AttractivenessFactor;
+                cParams.ExploProportionConst = _sParams.ColonyParams.ExploProportionConst;
+            });
+
+            serviceCollection.AddSingleton<IRandom, RandomGen>();
+
             switch (_sParams.Algorithm)
             {
                 case "AS":
-                    _solver = new AsSolver(_problem, _sParams);
+                    serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AsAnt>>();
+                    serviceCollection.AddTransient<IColony, AsColony>();
+                    serviceCollection.AddTransient<SolverBase, AsSolver>();
+                    // _solver = new AsSolver(_problem, _sParams);
                     break;
                 case "ACS":
                     Console.WriteLine($"Using ACS Solver");
-                    _solver = new AcsSolver(_problem, _sParams);
+                    serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AcsAnt>>();
+                    serviceCollection.AddTransient<IColony, AcsColony>();
+                    serviceCollection.AddTransient<SolverBase, AcsSolver>();
+                    // _solver = new AcsSolver(_problem, _sParams);
                     break;
             }
-            ITour res = _solver.Solve();
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+            _solver = serviceProvider.GetService<SolverBase>();
+            ITour res = _solver.Solve(_problem);
 
             stopWatch.Stop();
 

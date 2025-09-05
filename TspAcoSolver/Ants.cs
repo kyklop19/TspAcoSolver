@@ -1,9 +1,20 @@
+using Microsoft.Extensions.Options;
+
 namespace TspAcoSolver
 {
     /// <summary>
+    /// Interface for ant class that is intended to find a tour in pheromone graph
+    /// </summary>
+    public interface IAnt
+    {
+        public Tour LastTour { get; set; }
+        public void FindTour(PheromoneGraph graph);
+    }
+
+    /// <summary>
     /// <c>AntBase</c> is abstract class intended for finding tour in given pheromone graph.
     /// </summary>
-    public abstract class AntBase
+    public abstract class AntBase : IAnt
     {
         public int CurrVertex { get; set; }
         public Tour LastTour { get; set; }
@@ -70,11 +81,11 @@ namespace TspAcoSolver
         public double AttractivenessFactor { get; init; }
         public double ExploProportionConst { get; init; }
 
-        public RandomAntBase(ColonyParams colonyParams, IRandom rnd) : base(rnd)
+        public RandomAntBase(IOptions<ColonyParams> colonyParams, IRandom rnd) : base(rnd)
         {
-            TrailLevelFactor = colonyParams.TrailLevelFactor;
-            AttractivenessFactor = colonyParams.AttractivenessFactor;
-            ExploProportionConst = colonyParams.ExploProportionConst;
+            TrailLevelFactor = colonyParams.Value.TrailLevelFactor;
+            AttractivenessFactor = colonyParams.Value.AttractivenessFactor;
+            ExploProportionConst = colonyParams.Value.ExploProportionConst;
         }
 
         /// <summary>
@@ -118,7 +129,7 @@ namespace TspAcoSolver
 
     public class AsAnt : RandomAntBase
     {
-        public AsAnt(ColonyParams colonyParams, IRandom rnd)
+        public AsAnt(IOptions<ColonyParams> colonyParams, IRandom rnd)
             : base(colonyParams, rnd) { }
         protected override int ChooseNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
@@ -128,7 +139,7 @@ namespace TspAcoSolver
 
     public class AcsAnt : RandomAntBase
     {
-        public AcsAnt(ColonyParams colonyParams, IRandom rnd)
+        public AcsAnt(IOptions<ColonyParams> colonyParams, IRandom rnd)
             : base(colonyParams, rnd) { }
 
         int ChooseBestNbr(PheromoneGraph graph, List<int> unvisited_nbrs)

@@ -60,6 +60,16 @@ namespace TspAcoSolver
         double minimumPheromoneAmount;
         public PheromoneGraph(double[,] adjMat, PheromoneParams pheromoneParams) : base(adjMat)
         {
+            if (pheromoneParams.CalculateInitialPheromoneAmount)
+            {
+                Console.WriteLine($"Calculating InitialPheromoneAmount");
+                NearestNbrAnt ant = new((IRandom)new RandomGen());
+                ant.FindTour(this);
+                pheromoneParams.InitialPheromoneAmount = 1 / (VertexCount * ant.LastTour.Length);
+                Console.WriteLine($"InitialPheromoneAmount: {pheromoneParams.InitialPheromoneAmount}");
+
+            }
+
             InitialPheromoneAmount = pheromoneParams.InitialPheromoneAmount;
             EvaporationCoef = pheromoneParams.EvaporationCoef;
             DecayCoef = pheromoneParams.DecayCoef;
@@ -86,7 +96,7 @@ namespace TspAcoSolver
 
         public void UpdateLocallyPheromones(Tour solution)
         {
-            Console.WriteLine($"{minimumPheromoneAmount > 0}");
+            // Console.WriteLine($"{minimumPheromoneAmount > 0}");
 
             for (int i = 0; i < solution.Vertices.Count - 1; i++)
             {
