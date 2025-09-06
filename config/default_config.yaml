@@ -2,17 +2,17 @@ algorithm: ACS
 pheromone_params:
   evaporation_coef: 0.1
   decay_coef: 0.1
-  pheromone_amount: 1.0
+  pheromone_amount: 0.0000000001 # important for premature convergence
   calculate_initial_pheromone_amount: true
   initial_pheromone_amount: 10.0
 termination_params:
   termination_rule: fixed
   iteration_count: 1000
   ceiling_percentage: 5.0
-  in_row_termination_count: 30
+  in_row_termination_count: 20
 colony_params:
   ant_count: 8
   thread_count: 4
-  trail_level_factor: 3
-  attractiveness_factor: 6
-  explo_proportion_const: 0.9
+  trail_level_factor: 1
+  attractiveness_factor: 2
+  explo_proportion_const: 0.8

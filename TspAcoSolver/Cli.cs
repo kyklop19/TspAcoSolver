@@ -3,6 +3,7 @@ using System.CommandLine.Help;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using ScottPlot.Plottables;
 
 namespace TspAcoSolver
 {
@@ -23,6 +24,8 @@ namespace TspAcoSolver
 
         Dictionary<string, Command> _commands;
         bool _quit = false;
+
+        bool _enableHeatmap = false;
         public Cli()
         {
             Config config = new();
@@ -49,8 +52,11 @@ namespace TspAcoSolver
 
             Command solveCommand = new(solveCmdName, "Solve problem");
             solveCommand.Options.Add(helpOption);
+            Option<bool> enableHeatmapOpt = new("--heatmap", ["-hm"]);
+            solveCommand.Options.Add(enableHeatmapOpt);
             solveCommand.SetAction(parseResult =>
             {
+                _enableHeatmap = parseResult.GetValue(enableHeatmapOpt);
                 ITour sol = GetSolution();
                 Console.WriteLine(sol);
                 Console.WriteLine($"Length: {sol.Length}");
@@ -169,6 +175,15 @@ namespace TspAcoSolver
             });
 
             serviceCollection.AddSingleton<IRandom, RandomGen>();
+
+            if (_enableHeatmap)
+            {
+                serviceCollection.AddTransient<IPheromoneGraphVisualiser, HeatmapPheromoneVisualiser>();
+            }
+            else
+            {
+                serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneVisualiser>();
+            }
 
             switch (_sParams.Algorithm)
             {

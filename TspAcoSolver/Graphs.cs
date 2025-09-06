@@ -51,6 +51,7 @@ namespace TspAcoSolver
 
     public class PheromoneGraph : WeightedGraph
     {
+        IPheromoneGraphVisualiser _visualiser;
         public double[,] Pheromones { get; set; }
         public double EvaporationCoef { get; init; }
         public double InitialPheromoneAmount { get; init; }
@@ -58,7 +59,7 @@ namespace TspAcoSolver
         public double DecayCoef { get; init; }
 
         double minimumPheromoneAmount;
-        public PheromoneGraph(double[,] adjMat, PheromoneParams pheromoneParams) : base(adjMat)
+        public PheromoneGraph(double[,] adjMat, PheromoneParams pheromoneParams, IPheromoneGraphVisualiser visualiser) : base(adjMat)
         {
             if (pheromoneParams.CalculateInitialPheromoneAmount)
             {
@@ -85,9 +86,11 @@ namespace TspAcoSolver
                     Pheromones[i, j] = InitialPheromoneAmount;
                 }
             }
+            _visualiser = visualiser;
+            visualiser.SetGraph(this);
 
         }
-        public PheromoneGraph(WeightedGraph graph, PheromoneParams pheromoneParams) : this(graph.Weights, pheromoneParams) { }
+        public PheromoneGraph(WeightedGraph graph, PheromoneParams pheromoneParams, IPheromoneGraphVisualiser visualiser) : this(graph.Weights, pheromoneParams, visualiser) { }
 
         public void UpdatePheromonesOnEdge(int source, int target)
         {
@@ -111,6 +114,8 @@ namespace TspAcoSolver
                 Pheromones[source, target] = Math.Max(((1 - DecayCoef) * Pheromones[source, target]) + (DecayCoef * InitialPheromoneAmount), minimumPheromoneAmount);
                 //TODO: refactor
             }
+
+            _visualiser.Refresh();
         }
 
         public void UpdateGloballyPheromones(List<Tour> solutions) //TODO: refactor
@@ -150,6 +155,8 @@ namespace TspAcoSolver
                 // Console.WriteLine($"");
 
             }
+
+            _visualiser.Refresh();
         }
 
         public void UpdatePheromonesOnWholeGraph(List<Tour> solutions)
@@ -181,17 +188,21 @@ namespace TspAcoSolver
                     Pheromones[i, j] = (1 - EvaporationCoef) * Pheromones[i, j] + pheromoneChange[i, j];
                 }
             }
+
+            _visualiser.Refresh();
         }
 
         public void Reinitialize()
         {
-        for (int i = 0; i < VertexCount; i++)
-        {
-            for (int j = 0; j < VertexCount; j++)
+            for (int i = 0; i < VertexCount; i++)
             {
-                Pheromones[i, j] = InitialPheromoneAmount;
+                for (int j = 0; j < VertexCount; j++)
+                {
+                    Pheromones[i, j] = InitialPheromoneAmount;
+                }
             }
-        }
+
+            _visualiser.Refresh();
         }
     }
 }

@@ -24,7 +24,7 @@ public sealed class PheromoneGraphTests
             {1d, 1d},
         });
 
-        _pGraph = new(_wGraph, _pParams);
+        _pGraph = new(_wGraph, _pParams, new NullPheromoneVisualiser());
     }
     [TestMethod]
     public void TestUpdateGloballyPheromones_NoZeroPheromoneLevels()

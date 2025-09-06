@@ -35,7 +35,7 @@ public sealed class AsAntTests
         { 3d, 2d}
         });
 
-        PheromoneGraph graph = new(wGraph, _pParams);
+        PheromoneGraph graph = new(wGraph, _pParams, new NullPheromoneVisualiser());
 
         ant.FindTour(graph);
 

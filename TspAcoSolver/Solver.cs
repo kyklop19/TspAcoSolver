@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace TspAcoSolver
 {
     delegate bool TerminationRule();
-    public abstract class SolverBase
+    public abstract class SolverBase(IServiceProvider _serviceProvider)
     {
         IProblem _problem;
         protected SolvingParams _sParams;
@@ -22,7 +22,7 @@ namespace TspAcoSolver
 
         TerminationRule _terminated;
 
-        public SolverBase(IColony colony, IOptions<SolvingParams> sParams)
+        public SolverBase(IServiceProvider serviceProvider, IColony colony, IOptions<SolvingParams> sParams) : this(serviceProvider)
         {
             AntColony = colony;
             _sParams = sParams.Value;
@@ -116,7 +116,7 @@ namespace TspAcoSolver
         public ITour Solve(IProblem problem)
         {
             _problem = problem;
-            Graph = new PheromoneGraph(_problem.ToGraph(), _sParams.PheromoneParams);
+            Graph = ActivatorUtilities.CreateInstance<PheromoneGraph>(_serviceProvider, _problem.ToGraph(), _sParams.PheromoneParams);
             _currBestTour = new InfiniteTour();
 
             _currIterationCount = 0;
@@ -130,7 +130,7 @@ namespace TspAcoSolver
                 _currIterationCount++;
                 Console.WriteLine($"{_currIterationCount}");
 
-                if (_currIterationCount % 100 == 0)
+                if (_currIterationCount % 200 == 0)
                 {
                     Graph.Reinitialize();
                 }
@@ -144,7 +144,7 @@ namespace TspAcoSolver
     /// </summary>
     public class AsSolver : SolverBase
     {
-        public AsSolver(IColony colony, IOptions<SolvingParams> sParams) : base(colony, sParams){}
+        public AsSolver(IServiceProvider serviceProvider, IColony colony, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, sParams){}
 
         protected override List<Tour> FilterSolutions(List<Tour> solutions)
         {
@@ -162,7 +162,7 @@ namespace TspAcoSolver
     /// </summary>
     public class AcsSolver : SolverBase
     {
-        public AcsSolver(IColony colony, IOptions<SolvingParams> sParams) : base(colony, sParams){}
+        public AcsSolver(IServiceProvider serviceProvider, IColony colony, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, sParams){}
 
         protected override List<Tour> FilterSolutions(List<Tour> solutions)
         {

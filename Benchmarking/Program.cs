@@ -60,6 +60,8 @@ class Program
 
                         serviceCollection.AddSingleton<IRandom, RandomGen>();
 
+                        serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneVisualiser>();
+
                         serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AcsAnt>>();
                         serviceCollection.AddTransient<IColony, AcsColony>();
                         serviceCollection.AddTransient<SolverBase, AcsSolver>();

@@ -1,9 +1,19 @@
 namespace TspAcoSolver
 {
+    /// <summary>
+    /// Interface for classes representing tour in traveling salesman problem
+    /// </summary>
     public interface ITour
     {
+        /// <summary>
+        /// Length of tour in the problem
+        /// </summary>
         public double Length { get; }
 
+        /// <summary>
+        /// Add <c>vertex</c> to the tour
+        /// </summary>
+        /// <param name="vertex">Vertex to be next in order in the tour</param>
         public void Add(int vertex);
     }
 
@@ -41,7 +51,7 @@ namespace TspAcoSolver
     }
 
     /// <summary>
-    /// Represents tour in a graph
+    /// Represents tour in a graph of tsp
     /// </summary>
     public class Tour : ITour
     {
@@ -77,6 +87,10 @@ namespace TspAcoSolver
 
         HashSet<int> _unvisitedVertices = new();
 
+        /// <summary>
+        /// Construct tour whose vertices are part of the <c>graph</c>
+        /// </summary>
+        /// <param name="graph">Graph on which the tour is constructed</param>
         public Tour(WeightedGraph graph)
         {
             Vertices = new();
@@ -123,7 +137,7 @@ namespace TspAcoSolver
         }
 
         /// <summary>
-        ///Checks if there are any neighboring vertices that could be added
+        /// Checks if there are any neighboring vertices that could be added
         /// </summary>
         /// <returns>True if there are no vertices that could be added</returns>
         public bool HasDeadEnd()
@@ -135,7 +149,7 @@ namespace TspAcoSolver
         /// Check if the tour is complete (contains all vertices of graph)
         /// </summary>
         /// <returns>True if the tour contains all vertices of graph</returns>
-        public bool HasAllVerteces()
+        public bool HasAllVertices()
         {
             return Vertices.Count == _graph.VertexCount;
         }
@@ -149,9 +163,13 @@ namespace TspAcoSolver
             return _graph.Weight(Vertices[Vertices.Count - 1], Vertices[0]) != Double.NaN;
         }
 
+        /// <summary>
+        /// Checks if the tour is valid (has all vertices and between all of them there are edges)
+        /// </summary>
+        /// <returns>True if is valid</returns>
         public bool IsValid()
         {
-            return HasAllVerteces() && CanConnectStartAndFinish();
+            return HasAllVertices() && CanConnectStartAndFinish();
         }
 
         public override string ToString()

@@ -47,6 +47,11 @@ namespace TspAcoSolver
         }
     }
 
+    /// <summary>
+    /// Abstract class representing traveling salesman problem which is specified
+    /// by providing coordinates of each city. Lengths of edges of graph are calculated
+    /// using <c>Distance</c> method.
+    /// </summary>
     public abstract class SpaceTravelingSalesmanProblem : IProblem
     {
         public List<double[]> Coords { get; init; }
@@ -60,6 +65,12 @@ namespace TspAcoSolver
             Dimension = dimension;
             this.Coords = coords;
         }
+        /// <summary>
+        /// Calculate distance from <c>coord1</c> to <c>coord2</c>
+        /// </summary>
+        /// <param name="coord1">Start coordinate</param>
+        /// <param name="coord2">Finish coordinate</param>
+        /// <returns>Distance from <c>coord1</c> to <c>coord2</c></returns>
         public abstract double Distance(double[] coord1, double[] coord2);
         public WeightedGraph ToGraph()
         {
@@ -75,10 +86,14 @@ namespace TspAcoSolver
         }
     }
 
+    /// <summary>
+    /// Class representing traveling salesman problem which is specified by
+    /// providing coordinates of each city in Euclidean n-space.
+    /// </summary>
     public class EuclidTravelingSalesmanProblem : SpaceTravelingSalesmanProblem
     {
 
-        public EuclidTravelingSalesmanProblem(int dimension, List<double[]> coords) : base(dimension, coords){}
+        public EuclidTravelingSalesmanProblem(int dimension, List<double[]> coords) : base(dimension, coords) { }
         public override double Distance(double[] coord1, double[] coord2)
         {
             double sum = 0;

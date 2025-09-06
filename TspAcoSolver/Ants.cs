@@ -37,7 +37,7 @@ namespace TspAcoSolver
             CurrVertex = rnd.Next(0, graph.VertexCount);
             LastTour.Add(CurrVertex);
 
-            while (!LastTour.HasAllVerteces() && !LastTour.HasDeadEnd())
+            while (!LastTour.HasAllVertices() && !LastTour.HasDeadEnd())
             {
                 CurrVertex = ChooseNbr(graph, LastTour.NextPossibleVertices());
                 LastTour.Add(CurrVertex);

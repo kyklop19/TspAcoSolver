@@ -1,6 +1,10 @@
 using System.Windows.Forms.Design;
 using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.Drawing;
+using ScottPlot.WinForms;
+using ScottPlot;
+using ScottPlot.Plottables;
+using System.Linq;
 
 namespace TspAcoSolver
 {
@@ -76,5 +80,113 @@ namespace TspAcoSolver
             Thread t = new Thread(new ThreadStart(Show));
             t.Start();
         }
+    }
+
+    public interface IPheromoneGraphVisualiser
+    {
+        public void SetGraph(PheromoneGraph graph);
+        public void Refresh();
+    }
+    public class NullPheromoneVisualiser : IPheromoneGraphVisualiser
+    {
+        public void SetGraph(PheromoneGraph graph){}
+        public void Refresh(){}
+    }
+
+    public class HeatmapPheromoneVisualiser : IPheromoneGraphVisualiser
+    {
+        Form _form = new();
+        FormsPlot _formsPlot;
+        double[,] _pheromones;
+        Thread _thread;
+
+        bool _enableLabels = false;
+        void AddLabels()
+        {
+            for (int y = 0; y < _pheromones.GetLength(0); y++)
+            {
+                for (int x = 0; x < _pheromones.GetLength(1); x++)
+                {
+                    Coordinates coord = new(x, y);
+                    string label = _pheromones[y, x].ToString();
+                    Text text = _formsPlot.Plot.Add.Text(label, coord);
+                    text.Alignment = Alignment.MiddleCenter;
+                    text.LabelFontSize = 10;
+                    text.LabelFontColor = Colors.Red;
+                    text.LabelText = "test";
+                }
+            }
+        }
+
+        void DrawHeatmap()
+        {
+            _formsPlot.Plot.Clear();
+            Heatmap hm = _formsPlot.Plot.Add.Heatmap(_pheromones);
+            if (_enableLabels)
+            {
+                AddLabels();
+            }
+            _formsPlot.Refresh();
+        }
+
+        void ToggleLabels(object sender, EventArgs e)
+        {
+            _enableLabels = !_enableLabels;
+            Refresh();
+        }
+
+        public void SetGraph(PheromoneGraph graph)
+        {
+            _pheromones = graph.Pheromones;
+            using (ManualResetEvent resetEvent = new(false))
+            {
+                _thread = new Thread(() =>
+                {
+                    _formsPlot = new()
+                    {
+                        Dock = DockStyle.Fill
+                    };
+
+                    resetEvent.Set();
+
+                    DrawHeatmap();
+
+                    TableLayoutPanel panel = new()
+                    {
+                        Dock = DockStyle.Fill
+                    };
+                    panel.RowCount = 2;
+                    Button btn = new()
+                    {
+                        Dock = DockStyle.Fill,
+                        Text = "Toggle labels",
+                    };
+                    btn.Click += new EventHandler(ToggleLabels);
+                    panel.RowStyles.Add(new RowStyle(SizeType.Percent, 90f));
+                    panel.RowStyles.Add(new RowStyle(SizeType.Percent, 10f));
+                    panel.Controls.Add(_formsPlot, 0, 0);
+                    panel.Controls.Add(btn, 0, 1);
+                    _form.Controls.Add(panel);
+
+                    _form.ShowDialog();
+                });
+                _thread.Start();
+                resetEvent.WaitOne();
+            }
+        }
+
+        public void Refresh()
+        {
+            _formsPlot.Invoke(DrawHeatmap);
+            _form.Invoke(() => { _form.Update(); });
+        }
+
+        // ~HeatmapPheromoneVisualiser()
+        // {
+        //     _form.Close();
+        //     _thread.Join();
+        //     Console.WriteLine($"window closed");
+
+        // }
     }
 }
