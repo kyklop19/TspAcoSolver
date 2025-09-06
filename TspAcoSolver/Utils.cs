@@ -53,4 +53,21 @@ namespace TspAcoSolver
             return index;
         }
     }
+
+    public class Counter
+    {
+        int _value = 0;
+
+        public int Value { get => _value; }
+
+        public void Reset()
+        {
+            _value = 0;
+        }
+
+        public void Inc() => _value++;
+        public void Dec() => _value--;
+
+        public override string ToString() => $"Count: {Value}";
+    }
 }

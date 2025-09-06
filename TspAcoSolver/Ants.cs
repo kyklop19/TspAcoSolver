@@ -113,15 +113,7 @@ namespace TspAcoSolver
                 scores[i] = score;
             }
 
-            int index = new RandomFuncs(new RandomGen()).ChooseWeightBiased(scores);
-            // System.Console.WriteLine($"Rnd: {rndNum}");
-            // foreach (double prob in probabilities)
-            // {
-            //     System.Console.Write($"{prob} ");
-            // }
-            // System.Console.WriteLine($"Index: {index}");
-
-
+            int index = new RandomFuncs(rnd).ChooseWeightBiased(scores);
             return unvisited_nbrs[index];
         }
 

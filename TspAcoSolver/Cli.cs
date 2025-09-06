@@ -173,8 +173,16 @@ namespace TspAcoSolver
                 cParams.AttractivenessFactor = _sParams.ColonyParams.AttractivenessFactor;
                 cParams.ExploProportionConst = _sParams.ColonyParams.ExploProportionConst;
             });
+            serviceCollection.Configure<TerminationParams>(tParams =>
+            {
+                tParams.TerminationRule = _sParams.TerminationParams.TerminationRule;
+                tParams.IterationCount = _sParams.TerminationParams.IterationCount;
+                tParams.CeilingPercentage = _sParams.TerminationParams.CeilingPercentage;
+                tParams.InRowTerminationCount = _sParams.TerminationParams.InRowTerminationCount;
+            });
 
             serviceCollection.AddSingleton<IRandom, RandomGen>();
+            serviceCollection.AddTransient<ITerminationChecker, TerminationChecker>();
 
             if (_enableHeatmap)
             {

@@ -57,8 +57,16 @@ class Program
                             cParams.AttractivenessFactor = solvingParams.ColonyParams.AttractivenessFactor;
                             cParams.ExploProportionConst = solvingParams.ColonyParams.ExploProportionConst;
                         });
+                        serviceCollection.Configure<TerminationParams>(tParams =>
+                        {
+                            tParams.TerminationRule = solvingParams.TerminationParams.TerminationRule;
+                            tParams.IterationCount = solvingParams.TerminationParams.IterationCount;
+                            tParams.CeilingPercentage = solvingParams.TerminationParams.CeilingPercentage;
+                            tParams.InRowTerminationCount = solvingParams.TerminationParams.InRowTerminationCount;
+                        });
 
                         serviceCollection.AddSingleton<IRandom, RandomGen>();
+                        serviceCollection.AddTransient<ITerminationChecker, TerminationChecker>();
 
                         serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneVisualiser>();
 

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 
 namespace TspAcoSolver
 {
-    delegate bool TerminationRule();
     public abstract class SolverBase(IServiceProvider _serviceProvider)
     {
         IProblem _problem;
@@ -14,49 +13,22 @@ namespace TspAcoSolver
 
         ITour _currBestTour = new InfiniteTour();
 
-        int _currIterationCount = 0;
-        public int CurrIterationCount { get => _currIterationCount; }
+        Counter _currIterationCounter = new();
+        public int CurrIterationCount { get => _currIterationCounter.Value; }
 
         protected ITour _minimumLengthSolInIter = new InfiniteTour();
-        int _inRowWithinPercentageCount = 0;
 
-        TerminationRule _terminated;
+        ITerminationChecker _terminationChecker;
 
-        public SolverBase(IServiceProvider serviceProvider, IColony colony, IOptions<SolvingParams> sParams) : this(serviceProvider)
+        public SolverBase(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IOptions<SolvingParams> sParams) : this(serviceProvider)
         {
             AntColony = colony;
             _sParams = sParams.Value;
+            _terminationChecker = terminationChecker;
+            _terminationChecker.CurrBestTour = _currBestTour;
+            _terminationChecker.MinimumLengthSolInIter = _minimumLengthSolInIter;
+            _terminationChecker.CurrIterationCounter = _currIterationCounter;
 
-            switch (_sParams.TerminationParams.TerminationRule)
-            {
-                case "fixed":
-                    _terminated = ReachedIterationCount;
-                    break;
-                case "within_percentage":
-                    _terminated = ReachedInRowCountWithinPercentage;
-                    break;
-            }
-        }
-
-        bool ReachedInRowCountWithinPercentage()
-        {
-            double ceilingLength = _currBestTour.Length * (1 + (_sParams.TerminationParams.CeilingPercentage / 100));
-
-
-            if (_minimumLengthSolInIter.Length <= ceilingLength)
-            {
-                _inRowWithinPercentageCount++;
-            }
-            else
-            {
-                _inRowWithinPercentageCount = 0;
-            }
-            return _inRowWithinPercentageCount >= _sParams.TerminationParams.InRowTerminationCount;
-        }
-
-        bool ReachedIterationCount()
-        {
-            return _currIterationCount == _sParams.TerminationParams.IterationCount;
         }
 
         /// <summary>
@@ -81,6 +53,7 @@ namespace TspAcoSolver
                 if (sol.Length < _minimumLengthSolInIter.Length)
                 {
                     _minimumLengthSolInIter = sol;
+                    _terminationChecker.MinimumLengthSolInIter = _minimumLengthSolInIter;
                 }
             }
             if (_minimumLengthSolInIter.Length < _currBestTour.Length)
@@ -88,7 +61,8 @@ namespace TspAcoSolver
                 Console.WriteLine($"Found better tour");
 
                 _currBestTour = _minimumLengthSolInIter;
-                _inRowWithinPercentageCount = 0;
+                _terminationChecker.CurrBestTour = _currBestTour;
+                _terminationChecker.ResetInRowWithinPercentageCount();
                 Console.WriteLine($"Best: {_currBestTour.Length}");
             }
 
@@ -116,21 +90,21 @@ namespace TspAcoSolver
         public ITour Solve(IProblem problem)
         {
             _problem = problem;
-            Graph = ActivatorUtilities.CreateInstance<PheromoneGraph>(_serviceProvider, _problem.ToGraph(), _sParams.PheromoneParams);
+            Graph = ActivatorUtilities.CreateInstance<PheromoneGraph>(_serviceProvider, _problem.ToGraph(), _sParams.PheromoneParams); //TODO: DI pParams and remove DI sParams
             _currBestTour = new InfiniteTour();
 
-            _currIterationCount = 0;
+            _currIterationCounter.Reset();
             List<Tour> solutions = new();
-            while (!_terminated())
+            while (!_terminationChecker.Terminated())
             {
                 solutions = AntColony.GenerateSolutions(Graph);
                 solutions = PostprocessSolutions(solutions);
                 UpdatePheromones(solutions);
 
-                _currIterationCount++;
-                Console.WriteLine($"{_currIterationCount}");
+                _currIterationCounter.Inc();
+                Console.WriteLine($"{_currIterationCounter}");
 
-                if (_currIterationCount % 200 == 0)
+                if (_currIterationCounter.Value % 200 == 0) //TODO: Add reinitializer
                 {
                     Graph.Reinitialize();
                 }
@@ -144,7 +118,7 @@ namespace TspAcoSolver
     /// </summary>
     public class AsSolver : SolverBase
     {
-        public AsSolver(IServiceProvider serviceProvider, IColony colony, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, sParams){}
+        public AsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, terminationChecker, sParams){}
 
         protected override List<Tour> FilterSolutions(List<Tour> solutions)
         {
@@ -162,7 +136,7 @@ namespace TspAcoSolver
     /// </summary>
     public class AcsSolver : SolverBase
     {
-        public AcsSolver(IServiceProvider serviceProvider, IColony colony, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, sParams){}
+        public AcsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, terminationChecker, sParams){}
 
         protected override List<Tour> FilterSolutions(List<Tour> solutions)
         {
