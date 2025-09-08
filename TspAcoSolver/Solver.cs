@@ -14,21 +14,27 @@ namespace TspAcoSolver
         ITour _currBestTour = new InfiniteTour();
 
         Counter _currIterationCounter = new();
+        Counter _stagnationCounter = new();
         public int CurrIterationCount { get => _currIterationCounter.Value; }
 
         protected ITour _minimumLengthSolInIter = new InfiniteTour();
 
         ITerminationChecker _terminationChecker;
+        IReinitializer _reinitializer;
 
-        public SolverBase(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IOptions<SolvingParams> sParams) : this(serviceProvider)
+        public SolverBase(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer, IOptions<SolvingParams> sParams) : this(serviceProvider)
         {
             AntColony = colony;
             _sParams = sParams.Value;
+
             _terminationChecker = terminationChecker;
             _terminationChecker.CurrBestTour = _currBestTour;
             _terminationChecker.MinimumLengthSolInIter = _minimumLengthSolInIter;
             _terminationChecker.CurrIterationCounter = _currIterationCounter;
 
+            _reinitializer = reinitializer;
+            _reinitializer.StagnationCounter = _stagnationCounter;
+            _reinitializer.CurrIterationCounter = _currIterationCounter;
         }
 
         /// <summary>
@@ -64,6 +70,12 @@ namespace TspAcoSolver
                 _terminationChecker.CurrBestTour = _currBestTour;
                 _terminationChecker.ResetInRowWithinPercentageCount();
                 Console.WriteLine($"Best: {_currBestTour.Length}");
+
+                _stagnationCounter.Reset();
+            }
+            else
+            {
+                _stagnationCounter.Inc();
             }
 
             return FilterSolutions(solutions);
@@ -104,10 +116,7 @@ namespace TspAcoSolver
                 _currIterationCounter.Inc();
                 Console.WriteLine($"{_currIterationCounter}");
 
-                if (_currIterationCounter.Value % 200 == 0) //TODO: Add reinitializer
-                {
-                    Graph.Reinitialize();
-                }
+                _reinitializer.TryReinitialize(Graph);
             }
             return _currBestTour;
         }
@@ -118,7 +127,7 @@ namespace TspAcoSolver
     /// </summary>
     public class AsSolver : SolverBase
     {
-        public AsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, terminationChecker, sParams){}
+        public AsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, terminationChecker, reinitializer, sParams){}
 
         protected override List<Tour> FilterSolutions(List<Tour> solutions)
         {
@@ -136,7 +145,7 @@ namespace TspAcoSolver
     /// </summary>
     public class AcsSolver : SolverBase
     {
-        public AcsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, terminationChecker, sParams){}
+        public AcsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, terminationChecker, reinitializer, sParams){}
 
         protected override List<Tour> FilterSolutions(List<Tour> solutions)
         {

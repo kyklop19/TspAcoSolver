@@ -19,7 +19,10 @@ namespace TspAcoSolver
             if (parser.TryConsume<YamlDotNet.Core.Events.Scalar>(out YamlDotNet.Core.Events.Scalar scalar))
             {
 
-                string[] values = scalar.Value.Split("|", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                string[] values = scalar.Value
+                                        .Split("|", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(str => str.Replace("_", ""))
+                                        .ToArray();
 
                 object result = Enum.ToObject(type, 0);
                 foreach (string value in values)
@@ -113,12 +116,27 @@ namespace TspAcoSolver
                     """;
         }
     }
+    public class ReinitializationParams
+    {
+        public ReinitializationRule ReinitializationRule { get; set; }
+        public int IterIncrement { get; set; }
+        public int StagnationCeiling { get; set; }
+        public override string ToString()
+        {
+            return $"""
+                    ReinitializationRule: {ReinitializationRule}
+                    IterIncrement: {IterIncrement}
+                    StagnationCeiling: {StagnationCeiling}
+                    """;
+        }
+    }
 
     public class SolvingParams
     {
         public string Algorithm { get; set; }
         public PheromoneParams PheromoneParams { get; set; }
         public TerminationParams TerminationParams { get; set; }
+        public ReinitializationParams ReinitializationParams { get; set; }
         public ColonyParams ColonyParams { get; set; }
 
         public override string ToString()
@@ -129,6 +147,8 @@ namespace TspAcoSolver
                         {PheromoneParams.ToString().Replace("\n", "\n    ")}
                     TerminationParams:
                         {TerminationParams.ToString().Replace("\n", "\n    ")}
+                    ReinitializationParams:
+                        {ReinitializationParams.ToString().Replace("\n", "\n    ")}
                     ColonyParams:
                         {ColonyParams.ToString().Replace("\n", "\n    ")}
                     """;

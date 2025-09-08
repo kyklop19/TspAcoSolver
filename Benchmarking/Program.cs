@@ -64,9 +64,16 @@ class Program
                             tParams.CeilingPercentage = solvingParams.TerminationParams.CeilingPercentage;
                             tParams.InRowTerminationCount = solvingParams.TerminationParams.InRowTerminationCount;
                         });
+                        serviceCollection.Configure<ReinitializationParams>(rParams =>
+                        {
+                            rParams.ReinitializationRule = solvingParams.ReinitializationParams.ReinitializationRule;
+                            rParams.IterIncrement = solvingParams.ReinitializationParams.IterIncrement;
+                            rParams.StagnationCeiling = solvingParams.ReinitializationParams.StagnationCeiling;
+                        });
 
                         serviceCollection.AddSingleton<IRandom, RandomGen>();
                         serviceCollection.AddTransient<ITerminationChecker, TerminationChecker>();
+                        serviceCollection.AddTransient<IReinitializer, Reinitializer>();
 
                         serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneVisualiser>();
 

@@ -180,9 +180,16 @@ namespace TspAcoSolver
                 tParams.CeilingPercentage = _sParams.TerminationParams.CeilingPercentage;
                 tParams.InRowTerminationCount = _sParams.TerminationParams.InRowTerminationCount;
             });
+            serviceCollection.Configure<ReinitializationParams>(rParams =>
+            {
+                rParams.ReinitializationRule = _sParams.ReinitializationParams.ReinitializationRule;
+                rParams.IterIncrement = _sParams.ReinitializationParams.IterIncrement;
+                rParams.StagnationCeiling = _sParams.ReinitializationParams.StagnationCeiling;
+            });
 
             serviceCollection.AddSingleton<IRandom, RandomGen>();
             serviceCollection.AddTransient<ITerminationChecker, TerminationChecker>();
+            serviceCollection.AddTransient<IReinitializer, Reinitializer>();
 
             if (_enableHeatmap)
             {
@@ -199,14 +206,12 @@ namespace TspAcoSolver
                     serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AsAnt>>();
                     serviceCollection.AddTransient<IColony, AsColony>();
                     serviceCollection.AddTransient<SolverBase, AsSolver>();
-                    // _solver = new AsSolver(_problem, _sParams);
                     break;
                 case "ACS":
                     Console.WriteLine($"Using ACS Solver");
                     serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AcsAnt>>();
                     serviceCollection.AddTransient<IColony, AcsColony>();
                     serviceCollection.AddTransient<SolverBase, AcsSolver>();
-                    // _solver = new AcsSolver(_problem, _sParams);
                     break;
             }
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();

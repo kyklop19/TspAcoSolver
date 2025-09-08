@@ -69,15 +69,6 @@ namespace TspAcoSolver
         public bool Terminated()
         {
             bool terminated = false;
-            // switch (_tParams.TerminationRule)
-            // {
-            //     case TerminationRule.Fixed:
-            //         terminated = ReachedIterationCount();
-            //         break;
-            //     case TerminationRule.WithinPercentage:
-            //         terminated = ReachedInRowCountWithinPercentage();
-            //         break;
-            // }
             if (_tParams.TerminationRule == TerminationRule.None)
             {
                 throw new Exception("No termination rule chosen.");
