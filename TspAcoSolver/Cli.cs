@@ -9,8 +9,8 @@ namespace TspAcoSolver
 {
     public enum ProblemType
     {
-        Tsp,
-        Euc2D,
+        Explicit,
+        Euclid,
     }
 
     /// <summary>
@@ -18,7 +18,7 @@ namespace TspAcoSolver
     /// </summary>
     public class Cli
     {
-        SolverBase _solver;
+        ISolver _solver;
         IProblem _problem;
         SolvingParams _sParams;
 
@@ -131,7 +131,7 @@ namespace TspAcoSolver
                         Console.WriteLine($"Csv file needs specified problem type. Use \"--type\" option.");
                         Console.ResetColor();
                         break;
-                    case ProblemType.Tsp:
+                    case ProblemType.Explicit:
                         CsvParser csvParser = new();
                         _problem = csvParser.Parse(path);
                         break;
@@ -147,7 +147,8 @@ namespace TspAcoSolver
         void SetConfig(string path)
         {
             Config config = new();
-            _sParams = config.Read(path);
+            _sParams = config.Read(@"default_config.yaml");
+            _sParams.Overwrite(config.Read(path));
             Console.WriteLine($"{_sParams}");
 
         }
@@ -205,17 +206,17 @@ namespace TspAcoSolver
                 case "AS":
                     serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AsAnt>>();
                     serviceCollection.AddTransient<IColony, AsColony>();
-                    serviceCollection.AddTransient<SolverBase, AsSolver>();
+                    serviceCollection.AddTransient<ISolver, AsSolver>();
                     break;
                 case "ACS":
                     Console.WriteLine($"Using ACS Solver");
                     serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AcsAnt>>();
                     serviceCollection.AddTransient<IColony, AcsColony>();
-                    serviceCollection.AddTransient<SolverBase, AcsSolver>();
+                    serviceCollection.AddTransient<ISolver, AcsSolver>();
                     break;
             }
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-            _solver = serviceProvider.GetService<SolverBase>();
+            _solver = serviceProvider.GetService<ISolver>();
             ITour res = _solver.Solve(_problem);
 
             stopWatch.Stop();

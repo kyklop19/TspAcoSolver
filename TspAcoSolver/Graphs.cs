@@ -61,7 +61,7 @@ namespace TspAcoSolver
         double minimumPheromoneAmount;
         public PheromoneGraph(double[,] adjMat, PheromoneParams pheromoneParams, IPheromoneGraphVisualiser visualiser) : base(adjMat)
         {
-            if (pheromoneParams.CalculateInitialPheromoneAmount)
+            if ((bool)pheromoneParams.CalculateInitialPheromoneAmount)
             {
                 Console.WriteLine($"Calculating InitialPheromoneAmount");
                 NearestNbrAnt ant = new((IRandom)new RandomGen());
@@ -71,10 +71,10 @@ namespace TspAcoSolver
 
             }
 
-            InitialPheromoneAmount = pheromoneParams.InitialPheromoneAmount;
-            EvaporationCoef = pheromoneParams.EvaporationCoef;
-            DecayCoef = pheromoneParams.DecayCoef;
-            PheromoneAmount = pheromoneParams.PheromoneAmount;
+            InitialPheromoneAmount = (double)pheromoneParams.InitialPheromoneAmount;
+            EvaporationCoef = (double)pheromoneParams.EvaporationCoef;
+            DecayCoef = (double)pheromoneParams.DecayCoef;
+            PheromoneAmount = (double)pheromoneParams.PheromoneAmount;
 
             minimumPheromoneAmount = InitialPheromoneAmount / 1000;
 

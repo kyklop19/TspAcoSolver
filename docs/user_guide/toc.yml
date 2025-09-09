@@ -5,6 +5,7 @@
 - name: Příkazy
   href: commands.md
 - name: Soubory s problémem
+  href: problem_file.md
   items:
   - name: TSP
     href: tsp_problem_file.md

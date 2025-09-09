@@ -9,3 +9,7 @@
     href: ant_system.md
   - name: Ant colony system
     href: ant_colony_system.md
+- name: Terminace
+  href: termination.md
+- name: Reinicializace
+  href: reinitialization.md

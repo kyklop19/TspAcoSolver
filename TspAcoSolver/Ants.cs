@@ -83,9 +83,9 @@ namespace TspAcoSolver
 
         public RandomAntBase(IOptions<ColonyParams> colonyParams, IRandom rnd) : base(rnd)
         {
-            TrailLevelFactor = colonyParams.Value.TrailLevelFactor;
-            AttractivenessFactor = colonyParams.Value.AttractivenessFactor;
-            ExploProportionConst = colonyParams.Value.ExploProportionConst;
+            TrailLevelFactor = (double)colonyParams.Value.TrailLevelFactor;
+            AttractivenessFactor = (double)colonyParams.Value.AttractivenessFactor;
+            ExploProportionConst = (double)colonyParams.Value.ExploProportionConst;
         }
 
         /// <summary>
@@ -104,6 +104,18 @@ namespace TspAcoSolver
             return score;
         }
 
+        /// <summary>
+        /// Randomly choose one of the <c>unvisited_nbrs</c> from <c>graph</c>
+        /// biased towards neighbors with higher score that was calculated using
+        /// the <c>ScoreEdge</c> method
+        /// </summary>
+        /// <param name="graph">Graph in which the neighbors are located</param>
+        /// <param name="unvisited_nbrs">Neighboring vertices from which to
+        /// choose the resulting vertex</param>
+        /// <returns>
+        /// One randomly chosen vertex from <c>unvisited_nbrs</c> biased towards
+        /// vertices with higher score
+        /// </returns>
         protected int ChooseRandomNbr(PheromoneGraph graph, List<int> unvisited_nbrs)
         {
             double[] scores = new double[unvisited_nbrs.Count];

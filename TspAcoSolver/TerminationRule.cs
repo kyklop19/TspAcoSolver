@@ -5,7 +5,7 @@ namespace TspAcoSolver
     [Flags]
     public enum TerminationRule
     {
-        None = 0,
+        None = 0, //TODO: remove
         Fixed = 1,
         WithinPercentage = 2,
     }
@@ -47,7 +47,7 @@ namespace TspAcoSolver
 
         bool ReachedInRowCountWithinPercentage()
         {
-            double ceilingLength = CurrBestTour.Length * (1 + (_tParams.CeilingPercentage / 100));
+            double ceilingLength = CurrBestTour.Length * (1 + (((double)_tParams.CeilingPercentage) / 100));
 
             if (MinimumLengthSolInIter.Length <= ceilingLength)
             {
@@ -75,7 +75,7 @@ namespace TspAcoSolver
             }
             foreach (Rule rule in _rules)
             {
-                if (_tParams.TerminationRule.HasFlag(rule.rule))
+                if (((TerminationRule)_tParams.TerminationRule).HasFlag(rule.rule))
                 {
                     terminated = terminated || rule.func();
                     if (terminated) break;

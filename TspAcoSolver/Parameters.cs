@@ -61,13 +61,41 @@ namespace TspAcoSolver
         }
     }
 
-    public class PheromoneParams
+    public abstract class Params
     {
-        public double EvaporationCoef { get; set; }
-        public double DecayCoef { get; set; }
-        public bool CalculateInitialPheromoneAmount { get; set; }
-        public double InitialPheromoneAmount { get; set; }
-        public double PheromoneAmount { get; set; }
+        public void Overwrite(Params otherParams)
+        {
+            if (this.GetType() != otherParams.GetType())
+            {
+                throw new Exception();
+            }
+
+            PropertyInfo[] properties = otherParams
+                                        .GetType()
+                                        .GetProperties()
+                                        .Where(p => p.GetValue(otherParams) != null)
+                                        .ToArray();
+            foreach (PropertyInfo property in properties)
+            {
+                if (property.PropertyType.IsSubclassOf(typeof(Params)))
+                {
+                    ((Params)(property.GetValue(this))).Overwrite((Params)(property.GetValue(otherParams)));
+                }
+                else
+                {
+                    property.SetValue(this, property.GetValue(otherParams));
+                }
+            }
+        }
+    }
+
+    public class PheromoneParams : Params
+    {
+        public double? EvaporationCoef { get; set; }
+        public double? DecayCoef { get; set; }
+        public bool? CalculateInitialPheromoneAmount { get; set; }
+        public double? InitialPheromoneAmount { get; set; }
+        public double? PheromoneAmount { get; set; }
 
         public override string ToString()
         {
@@ -80,13 +108,13 @@ namespace TspAcoSolver
                     """;
         }
     }
-    public class ColonyParams
+    public class ColonyParams : Params
     {
-        public int AntCount { get; set; }
-        public int ThreadCount { get; set; }
-        public double TrailLevelFactor { get; set; }
-        public double AttractivenessFactor { get; set; }
-        public double ExploProportionConst { get; set; }
+        public int? AntCount { get; set; }
+        public int? ThreadCount { get; set; }
+        public double? TrailLevelFactor { get; set; }
+        public double? AttractivenessFactor { get; set; }
+        public double? ExploProportionConst { get; set; }
 
         public override string ToString()
         {
@@ -99,12 +127,12 @@ namespace TspAcoSolver
                     """;
         }
     }
-    public class TerminationParams
+    public class TerminationParams : Params
     {
-        public TerminationRule TerminationRule { get; set; }
-        public int IterationCount { get; set; }
-        public double CeilingPercentage { get; set; }
-        public int InRowTerminationCount { get; set; }
+        public TerminationRule? TerminationRule { get; set; }
+        public int? IterationCount { get; set; }
+        public double? CeilingPercentage { get; set; }
+        public int? InRowTerminationCount { get; set; }
 
         public override string ToString()
         {
@@ -116,11 +144,11 @@ namespace TspAcoSolver
                     """;
         }
     }
-    public class ReinitializationParams
+    public class ReinitializationParams : Params
     {
-        public ReinitializationRule ReinitializationRule { get; set; }
-        public int IterIncrement { get; set; }
-        public int StagnationCeiling { get; set; }
+        public ReinitializationRule? ReinitializationRule { get; set; }
+        public int? IterIncrement { get; set; }
+        public int? StagnationCeiling { get; set; }
         public override string ToString()
         {
             return $"""
@@ -131,9 +159,9 @@ namespace TspAcoSolver
         }
     }
 
-    public class SolvingParams
+    public class SolvingParams : Params
     {
-        public string Algorithm { get; set; }
+        public string? Algorithm { get; set; }
         public PheromoneParams PheromoneParams { get; set; }
         public TerminationParams TerminationParams { get; set; }
         public ReinitializationParams ReinitializationParams { get; set; }

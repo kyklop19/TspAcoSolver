@@ -34,13 +34,20 @@
     "output": "_site",
     "template": [
       "default",
-      "modern"
+      "modern",
+      "./template"
     ],
     "globalMetadata": {
       "_appName": "TspAcoSolver",
       "_appTitle": "TspAcoSolver",
       "_enableSearch": true,
       "pdf": true
+    },
+    "markdownEngineProperties": {
+      "markdigExtensions": [
+          "DefinitionLists",
+          "SmartyPants"
+      ]
     }
   }
 }

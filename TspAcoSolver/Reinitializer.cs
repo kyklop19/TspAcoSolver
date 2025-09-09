@@ -50,7 +50,7 @@ namespace TspAcoSolver
             {
                 foreach (Rule rule in _rules)
                 {
-                    if (_rParams.ReinitializationRule.HasFlag(rule.rule))
+                    if (((ReinitializationRule)_rParams.ReinitializationRule).HasFlag(rule.rule))
                     {
                         reinitialized = reinitialized || rule.func();
                         if (reinitialized)

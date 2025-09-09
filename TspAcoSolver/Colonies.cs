@@ -15,8 +15,8 @@ namespace TspAcoSolver
         public int AntCount { get => _ants.Length; }
         public ColonyBase(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParams)
         {
-            _ants = antFactory.CreateAnts(colonyParams.Value.AntCount);
-            _threadCount = colonyParams.Value.ThreadCount;
+            _ants = antFactory.CreateAnts((int)colonyParams.Value.AntCount);
+            _threadCount = (int)colonyParams.Value.ThreadCount;
         }
 
         protected Tour Generate1Solution(PheromoneGraph graph, int antIndex)

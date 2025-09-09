@@ -3,7 +3,12 @@ using Microsoft.Extensions.Options;
 
 namespace TspAcoSolver
 {
-    public abstract class SolverBase(IServiceProvider _serviceProvider)
+    public interface ISolver
+    {
+        public int CurrIterationCount { get; }
+        public ITour Solve(IProblem problem);
+    }
+    public abstract class SolverBase(IServiceProvider _serviceProvider) : ISolver
     {
         IProblem _problem;
         protected SolvingParams _sParams;
@@ -107,6 +112,7 @@ namespace TspAcoSolver
 
             _currIterationCounter.Reset();
             List<Tour> solutions = new();
+            //region AlgorithmCore
             while (!_terminationChecker.Terminated())
             {
                 solutions = AntColony.GenerateSolutions(Graph);
@@ -118,6 +124,7 @@ namespace TspAcoSolver
 
                 _reinitializer.TryReinitialize(Graph);
             }
+            //endregion
             return _currBestTour;
         }
 
