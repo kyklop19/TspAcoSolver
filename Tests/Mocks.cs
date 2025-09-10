@@ -42,10 +42,11 @@ namespace Tests
     public class MockTour : ITour
     {
         double _length;
-        public MockTour(double length)
+        public MockTour(double length) : this(length, new()){}
+        public MockTour(double length, List<int> vertices)
         {
             _length = length;
-            Vertices = new();
+            Vertices = vertices;
         }
 
         public double Length { get => _length; }
@@ -53,6 +54,15 @@ namespace Tests
         public void Add(int vertex) { }
 
         public List<int> Vertices { get; init; }
+
+        public bool HasAllVertices() => false;
+
+        public bool HasDeadEnd() => true;
+
+        public List<int> NextPossibleVertices() => new();
+
+        public bool IsValid() => true;
+
     }
 
     public class MockProblem : IProblem
@@ -62,6 +72,33 @@ namespace Tests
         public WeightedGraph ToGraph()
         {
             return new WeightedGraph(new double[,] { { } });
+        }
+    }
+
+    public class MockAnt : IAnt
+    {
+        ITour[] _tours;
+        int _index = 0;
+
+        public MockAnt(ITour[] tours)
+        {
+            _tours = tours;
+        }
+
+        public ITour LastTour { get => _tours[_index++]; set; }
+
+        public void FindTour(PheromoneGraph graph) { }
+    }
+
+    public class MockAntFactory<T> : IAntFactory<T> where T : IAnt
+    {
+        T[] _ants;
+        public MockAntFactory(T[] ants) {
+            _ants = ants;
+        }
+        public T[] CreateAnts(int count)
+        {
+            return _ants;
         }
     }
 }

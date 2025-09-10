@@ -100,7 +100,7 @@ namespace TspAcoSolver
 
         }
 
-        public void UpdateLocallyPheromones(Tour solution)
+        public void UpdateLocallyPheromones(ITour solution)
         {
             // Console.WriteLine($"{minimumPheromoneAmount > 0}");
 

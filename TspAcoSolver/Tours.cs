@@ -17,6 +17,13 @@ namespace TspAcoSolver
         public void Add(int vertex);
 
         public List<int> Vertices { get; init; }
+
+        public bool HasAllVertices();
+        public bool HasDeadEnd();
+
+        public List<int> NextPossibleVertices();
+
+        public bool IsValid();
     }
 
     public class IncompleteTourException : Exception
@@ -197,5 +204,13 @@ namespace TspAcoSolver
         public void Add(int vertex) { }
 
         public List<int> Vertices { get; init; }
+
+        public bool HasAllVertices() => false;
+
+        public bool HasDeadEnd() => true;
+
+        public List<int> NextPossibleVertices() => new();
+
+        public bool IsValid() => false;
     }
 }

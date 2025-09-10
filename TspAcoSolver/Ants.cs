@@ -7,7 +7,7 @@ namespace TspAcoSolver
     /// </summary>
     public interface IAnt
     {
-        public Tour LastTour { get; set; }
+        public ITour LastTour { get; set; }
         public void FindTour(PheromoneGraph graph);
     }
 
@@ -17,7 +17,7 @@ namespace TspAcoSolver
     public abstract class AntBase : IAnt
     {
         public int CurrVertex { get; set; }
-        public Tour LastTour { get; set; }
+        public ITour LastTour { get; set; }
 
         protected IRandom rnd;
 
@@ -32,7 +32,7 @@ namespace TspAcoSolver
         /// <param name="graph">Pheromone graph in which the ant tries to find the tour</param>
         public void FindTour(PheromoneGraph graph)
         {
-            LastTour = new(graph);
+            LastTour = new Tour(graph);
 
             CurrVertex = rnd.Next(0, graph.VertexCount);
             LastTour.Add(CurrVertex);

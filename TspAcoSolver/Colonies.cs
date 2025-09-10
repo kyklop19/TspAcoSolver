@@ -13,13 +13,14 @@ namespace TspAcoSolver
 
         protected int _threadCount;
         public int AntCount { get => _ants.Length; }
-        public ColonyBase(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParams)
+        public ColonyBase(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParamsOpt) : this(antFactory, colonyParamsOpt.Value) {}
+        public ColonyBase(IAntFactory<IAnt> antFactory, ColonyParams colonyParams)
         {
-            _ants = antFactory.CreateAnts((int)colonyParams.Value.AntCount);
-            _threadCount = (int)colonyParams.Value.ThreadCount;
+            _ants = antFactory.CreateAnts((int)colonyParams.AntCount);
+            _threadCount = (int)colonyParams.ThreadCount;
         }
 
-        protected Tour Generate1Solution(PheromoneGraph graph, int antIndex)
+        protected ITour Generate1Solution(PheromoneGraph graph, int antIndex)
         {
             IAnt ant = _ants[antIndex];
             ant.FindTour(graph);
@@ -32,13 +33,14 @@ namespace TspAcoSolver
     public class AsColony : ColonyBase
     {
         public AsColony(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParamsOpt) : base(antFactory, colonyParamsOpt){}
-        List<Tour> GenerateSolutionsInRange(PheromoneGraph graph, int from, int to)
+        public AsColony(IAntFactory<IAnt> antFactory, ColonyParams colonyParams) : base(antFactory, colonyParams){}
+        List<ITour> GenerateSolutionsInRange(PheromoneGraph graph, int from, int to)
         {
-            List<Tour> solutions = new();
+            List<ITour> solutions = new();
             for (int i = from; i < to; i++)
             {
                 // Console.WriteLine($"Ant {i} solving in Thread {Thread.CurrentThread.ManagedThreadId}");
-                Tour solution = Generate1Solution(graph, i);
+                ITour solution = Generate1Solution(graph, i);
                 if (solution.IsValid())
                 {
                     solutions.Add(solution);
@@ -53,7 +55,7 @@ namespace TspAcoSolver
             Thread[] threads = new Thread[_threadCount];
             int antCountForThread = AntCount / _threadCount;
 
-            List<Tour>[] results = new List<Tour>[_threadCount];
+            List<ITour>[] results = new List<ITour>[_threadCount];
             Lock threadLock = new();
             for (int i = 0; i < _threadCount; i++)
             {
@@ -90,13 +92,14 @@ namespace TspAcoSolver
     public class AcsColony : ColonyBase
     {
         public AcsColony(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParamsOpt) : base(antFactory, colonyParamsOpt){}
+        public AcsColony(IAntFactory<IAnt> antFactory, ColonyParams colonyParams) : base(antFactory, colonyParams){}
 
         public override List<ITour> GenerateSolutions(PheromoneGraph graph)
         {
             List<ITour> solutions = new();
             for (int i = 0; i < AntCount; i++)
             {
-                Tour solution = Generate1Solution(graph, i);
+                ITour solution = Generate1Solution(graph, i);
                 // Console.WriteLine($"Local update");
 
                 graph.UpdateLocallyPheromones(solution);
