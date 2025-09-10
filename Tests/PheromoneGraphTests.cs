@@ -35,7 +35,7 @@ public sealed class PheromoneGraphTests
 
         for (int __ = 0; __ < 50_000; __++)
         {
-            _pGraph.UpdateGloballyPheromones(new List<Tour> { tour });
+            _pGraph.UpdateGloballyPheromones(new List<ITour> { tour });
         }
         Assert.AreNotEqual(0, _pGraph.Pheromones[0, 0]);
     }

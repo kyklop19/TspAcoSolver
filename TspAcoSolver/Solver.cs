@@ -11,7 +11,6 @@ namespace TspAcoSolver
     public abstract class SolverBase(IServiceProvider _serviceProvider) : ISolver
     {
         IProblem _problem;
-        protected SolvingParams _sParams;
 
         protected PheromoneGraph Graph;
         protected IColony AntColony { get; init; }
@@ -27,10 +26,9 @@ namespace TspAcoSolver
         ITerminationChecker _terminationChecker;
         IReinitializer _reinitializer;
 
-        public SolverBase(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer, IOptions<SolvingParams> sParams) : this(serviceProvider)
+        public SolverBase(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer) : this(serviceProvider)
         {
             AntColony = colony;
-            _sParams = sParams.Value;
 
             _terminationChecker = terminationChecker;
             _terminationChecker.CurrBestTour = _currBestTour;
@@ -50,12 +48,12 @@ namespace TspAcoSolver
         /// <returns>
         /// Solutions for which the <c>PheromoneGraph</c> should be updated
         /// </returns>
-        protected abstract List<Tour> FilterSolutions(List<Tour> solutions);
+        protected abstract List<ITour> FilterSolutions(List<ITour> solutions);
 
-        List<Tour> PostprocessSolutions(List<Tour> solutions)
+        List<ITour> PostprocessSolutions(List<ITour> solutions)
         {
             _minimumLengthSolInIter = new InfiniteTour();
-            foreach (Tour sol in solutions)
+            foreach (ITour sol in solutions)
             {
                 // Console.WriteLine(sol);
 
@@ -94,7 +92,7 @@ namespace TspAcoSolver
         /// Filtered solutions for which the <c>PheromoneGraph</c> should be
         /// updated
         /// </param>
-        protected abstract void UpdatePheromones(List<Tour> solutions);
+        protected abstract void UpdatePheromones(List<ITour> solutions);
 
         /// <summary>
         /// Try to find tour of the problem with length as close as possible to
@@ -107,11 +105,11 @@ namespace TspAcoSolver
         public ITour Solve(IProblem problem)
         {
             _problem = problem;
-            Graph = ActivatorUtilities.CreateInstance<PheromoneGraph>(_serviceProvider, _problem.ToGraph(), _sParams.PheromoneParams); //TODO: DI pParams and remove DI sParams
+            Graph = ActivatorUtilities.CreateInstance<PheromoneGraph>(_serviceProvider, _problem.ToGraph());
             _currBestTour = new InfiniteTour();
 
             _currIterationCounter.Reset();
-            List<Tour> solutions = new();
+            List<ITour> solutions = new();
             //region AlgorithmCore
             while (!_terminationChecker.Terminated())
             {
@@ -134,14 +132,14 @@ namespace TspAcoSolver
     /// </summary>
     public class AsSolver : SolverBase
     {
-        public AsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, terminationChecker, reinitializer, sParams){}
+        public AsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer) : base(serviceProvider, colony, terminationChecker, reinitializer){}
 
-        protected override List<Tour> FilterSolutions(List<Tour> solutions)
+        protected override List<ITour> FilterSolutions(List<ITour> solutions)
         {
             return solutions;
         }
 
-        protected override void UpdatePheromones(List<Tour> solutions)
+        protected override void UpdatePheromones(List<ITour> solutions)
         {
             Graph.UpdatePheromonesOnWholeGraph(solutions);
         }
@@ -152,11 +150,11 @@ namespace TspAcoSolver
     /// </summary>
     public class AcsSolver : SolverBase
     {
-        public AcsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer, IOptions<SolvingParams> sParams) : base(serviceProvider, colony, terminationChecker, reinitializer, sParams){}
+        public AcsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer) : base(serviceProvider, colony, terminationChecker, reinitializer){}
 
-        protected override List<Tour> FilterSolutions(List<Tour> solutions)
+        protected override List<ITour> FilterSolutions(List<ITour> solutions)
         {
-            List<Tour> res = new();
+            List<ITour> res = new();
             if (_minimumLengthSolInIter is Tour)
             {
                 res.Add((Tour)_minimumLengthSolInIter);
@@ -164,7 +162,7 @@ namespace TspAcoSolver
             return res;
         }
 
-        protected override void UpdatePheromones(List<Tour> solutions)
+        protected override void UpdatePheromones(List<ITour> solutions)
         {
             // Console.WriteLine($"Global update");
 

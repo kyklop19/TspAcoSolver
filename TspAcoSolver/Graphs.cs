@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace TspAcoSolver
 {
     public class Graph
@@ -90,6 +92,7 @@ namespace TspAcoSolver
             visualiser.SetGraph(this);
 
         }
+        public PheromoneGraph(WeightedGraph graph, IOptions<PheromoneParams> pheromoneParamsOpt, IPheromoneGraphVisualiser visualiser) : this(graph.Weights, pheromoneParamsOpt.Value, visualiser) { }
         public PheromoneGraph(WeightedGraph graph, PheromoneParams pheromoneParams, IPheromoneGraphVisualiser visualiser) : this(graph.Weights, pheromoneParams, visualiser) { }
 
         public void UpdatePheromonesOnEdge(int source, int target)
@@ -118,7 +121,7 @@ namespace TspAcoSolver
             _visualiser.Refresh();
         }
 
-        public void UpdateGloballyPheromones(List<Tour> solutions) //TODO: refactor
+        public void UpdateGloballyPheromones(List<ITour> solutions) //TODO: refactor
         {
             double[,] pheromoneChange = new double[VertexCount, VertexCount];
 
@@ -131,7 +134,7 @@ namespace TspAcoSolver
             }
 
             double updateAmount;
-            foreach (Tour sol in solutions)
+            foreach (ITour sol in solutions)
             {
                 updateAmount = PheromoneAmount / sol.Length;
                 for (int i = 0; i < sol.Vertices.Count - 1; i++)
@@ -159,7 +162,7 @@ namespace TspAcoSolver
             _visualiser.Refresh();
         }
 
-        public void UpdatePheromonesOnWholeGraph(List<Tour> solutions)
+        public void UpdatePheromonesOnWholeGraph(List<ITour> solutions)
         {
             double[,] pheromoneChange = new double[VertexCount, VertexCount];
 
@@ -172,7 +175,7 @@ namespace TspAcoSolver
             }
 
             double updateAmount;
-            foreach (Tour sol in solutions)
+            foreach (ITour sol in solutions)
             {
                 updateAmount = PheromoneAmount / sol.Length;
                 for (int i = 0; i < sol.Vertices.Count - 1; i++)

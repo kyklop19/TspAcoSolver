@@ -159,13 +159,6 @@ namespace TspAcoSolver
             stopWatch.Start();
 
             ServiceCollection serviceCollection = new();
-            serviceCollection.Configure<SolvingParams>(sParams =>
-            {
-                sParams.Algorithm = _sParams.Algorithm;
-                sParams.PheromoneParams = _sParams.PheromoneParams;
-                sParams.TerminationParams = _sParams.TerminationParams;
-                sParams.ColonyParams = _sParams.ColonyParams;
-            });
             serviceCollection.Configure<ColonyParams>(cParams =>
             {
                 cParams.AntCount = _sParams.ColonyParams.AntCount;
@@ -187,6 +180,7 @@ namespace TspAcoSolver
                 rParams.IterIncrement = _sParams.ReinitializationParams.IterIncrement;
                 rParams.StagnationCeiling = _sParams.ReinitializationParams.StagnationCeiling;
             });
+            serviceCollection.Configure<PheromoneParams>(pParams => pParams.Overwrite(_sParams.PheromoneParams));
 
             serviceCollection.AddSingleton<IRandom, RandomGen>();
             serviceCollection.AddTransient<ITerminationChecker, TerminationChecker>();

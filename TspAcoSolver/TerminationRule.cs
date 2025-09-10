@@ -33,9 +33,10 @@ namespace TspAcoSolver
 
         List<Rule> _rules = new();
 
-        public TerminationChecker(IOptions<TerminationParams> tParamsOpt)
+        public TerminationChecker(IOptions<TerminationParams> tParamsOpt) : this(tParamsOpt.Value) {}
+        public TerminationChecker(TerminationParams tParams)
         {
-            _tParams = tParamsOpt.Value;
+            _tParams = tParams;
             _rules.Add(new Rule(TerminationRule.Fixed, ReachedIterationCount));
             _rules.Add(new Rule(TerminationRule.WithinPercentage, ReachedInRowCountWithinPercentage));
         }
@@ -63,7 +64,7 @@ namespace TspAcoSolver
 
         bool ReachedIterationCount()
         {
-            return CurrIterationCounter.Value == _tParams.IterationCount;
+            return CurrIterationCounter.Value >= _tParams.IterationCount;
         }
 
         public bool Terminated()

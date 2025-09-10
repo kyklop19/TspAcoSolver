@@ -15,6 +15,8 @@ namespace TspAcoSolver
         /// </summary>
         /// <param name="vertex">Vertex to be next in order in the tour</param>
         public void Add(int vertex);
+
+        public List<int> Vertices { get; init; }
     }
 
     public class IncompleteTourException : Exception
@@ -186,8 +188,14 @@ namespace TspAcoSolver
     }
     public class InfiniteTour : ITour
     {
+        public InfiniteTour()
+        {
+            Vertices = new();
+        }
         public double Length { get => Double.PositiveInfinity; }
 
         public void Add(int vertex) { }
+
+        public List<int> Vertices { get; init; }
     }
 }

@@ -5,7 +5,7 @@ namespace TspAcoSolver
 
     public interface IColony
     {
-        public List<Tour> GenerateSolutions(PheromoneGraph graph);
+        public List<ITour> GenerateSolutions(PheromoneGraph graph);
     }
     public abstract class ColonyBase : IColony
     {
@@ -26,7 +26,7 @@ namespace TspAcoSolver
             return ant.LastTour;
         }
 
-        public abstract List<Tour> GenerateSolutions(PheromoneGraph graph);
+        public abstract List<ITour> GenerateSolutions(PheromoneGraph graph);
     }
 
     public class AsColony : ColonyBase
@@ -47,9 +47,9 @@ namespace TspAcoSolver
 
             return solutions;
         }
-        public override List<Tour> GenerateSolutions(PheromoneGraph graph)
+        public override List<ITour> GenerateSolutions(PheromoneGraph graph)
         {
-            List<Tour> solutions = new();
+            List<ITour> solutions = new();
             Thread[] threads = new Thread[_threadCount];
             int antCountForThread = AntCount / _threadCount;
 
@@ -91,9 +91,9 @@ namespace TspAcoSolver
     {
         public AcsColony(IAntFactory<IAnt> antFactory, IOptions<ColonyParams> colonyParamsOpt) : base(antFactory, colonyParamsOpt){}
 
-        public override List<Tour> GenerateSolutions(PheromoneGraph graph)
+        public override List<ITour> GenerateSolutions(PheromoneGraph graph)
         {
-            List<Tour> solutions = new();
+            List<ITour> solutions = new();
             for (int i = 0; i < AntCount; i++)
             {
                 Tour solution = Generate1Solution(graph, i);
