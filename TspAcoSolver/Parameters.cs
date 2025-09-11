@@ -11,11 +11,14 @@ namespace TspAcoSolver
     {
         public bool Accepts(Type type)
         {
+            type = Nullable.GetUnderlyingType(type) ?? type;
             return type.IsEnum && type.GetCustomAttribute<FlagsAttribute>() != null;
         }
 
         public object ReadYaml(YamlDotNet.Core.IParser parser, Type type, ObjectDeserializer deserializer)
         {
+            type = Nullable.GetUnderlyingType(type) ?? type;
+
             if (parser.TryConsume<YamlDotNet.Core.Events.Scalar>(out YamlDotNet.Core.Events.Scalar scalar))
             {
 

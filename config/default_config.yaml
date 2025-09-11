@@ -6,7 +6,7 @@ pheromone_params:
   calculate_initial_pheromone_amount: true
   initial_pheromone_amount: 10.0
 termination_params:
-  termination_rule: fixed #| within_percentage
+  termination_rule: fixed | within_percentage
   iteration_count: 1000
   ceiling_percentage: 2.0
   in_row_termination_count: 30

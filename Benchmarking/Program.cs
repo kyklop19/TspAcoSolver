@@ -42,13 +42,13 @@ class Program
                     new WaitCallback((object x) =>
                     {
                         ServiceCollection serviceCollection = new();
-                        serviceCollection.Configure<SolvingParams>(sParams =>
-                        {
-                            sParams.Algorithm = solvingParams.Algorithm;
-                            sParams.PheromoneParams = solvingParams.PheromoneParams;
-                            sParams.TerminationParams = solvingParams.TerminationParams;
-                            sParams.ColonyParams = solvingParams.ColonyParams;
-                        });
+                        // serviceCollection.Configure<SolvingParams>(sParams =>
+                        // {
+                        //     sParams.Algorithm = solvingParams.Algorithm;
+                        //     sParams.PheromoneParams = solvingParams.PheromoneParams;
+                        //     sParams.TerminationParams = solvingParams.TerminationParams;
+                        //     sParams.ColonyParams = solvingParams.ColonyParams;
+                        // });
                         serviceCollection.Configure<ColonyParams>(cParams =>
                         {
                             cParams.AntCount = solvingParams.ColonyParams.AntCount;
@@ -70,6 +70,7 @@ class Program
                             rParams.IterIncrement = solvingParams.ReinitializationParams.IterIncrement;
                             rParams.StagnationCeiling = solvingParams.ReinitializationParams.StagnationCeiling;
                         });
+                        serviceCollection.Configure<PheromoneParams>(pParams => pParams.Overwrite(solvingParams.PheromoneParams));
 
                         serviceCollection.AddSingleton<IRandom, RandomGen>();
                         serviceCollection.AddTransient<ITerminationChecker, TerminationChecker>();

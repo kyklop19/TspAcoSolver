@@ -133,16 +133,28 @@ namespace TspAcoSolver
 
         public List<int> NextPossibleVertices() //TODO: store in atr
         {
-            List<int> nbrs = _graph.Nbrs(Vertices[Vertices.Count - 1]);
-            List<int> unvisited_nbrs = new List<int>();
-            foreach (int nbr in nbrs)
+            if (Vertices.Count == 0)
             {
-                if (_unvisitedVertices.Contains(nbr))
+                List<int> res = new();
+                for (int i = 0; i < _graph.VertexCount; i++)
                 {
-                    unvisited_nbrs.Add(nbr);
+                    res.Add(i);
                 }
+                return res;
             }
-            return unvisited_nbrs;
+            else
+            {
+                List<int> nbrs = _graph.Nbrs(Vertices[Vertices.Count - 1]);
+                List<int> unvisited_nbrs = new List<int>();
+                foreach (int nbr in nbrs)
+                {
+                    if (_unvisitedVertices.Contains(nbr))
+                    {
+                        unvisited_nbrs.Add(nbr);
+                    }
+                }
+                return unvisited_nbrs;
+            }
         }
 
         /// <summary>

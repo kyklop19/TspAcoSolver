@@ -60,7 +60,7 @@ namespace TspAcoSolver
             for (int i = 1; i < unvisitedNbrs.Count; i++)
             {
                 double dist = graph.Weight(CurrVertex, unvisitedNbrs[i]);
-                if (dist > nearestNbrDist)
+                if (dist < nearestNbrDist)
                 {
                     nearestNbrDist = dist;
                     nearestNbrIndex = i;
