@@ -20,7 +20,8 @@ namespace TspAcoSolver
                 adjList[i] = new();
                 for (int j = 0; j < adjMat.GetLength(1); j++)
                 {
-                    if (adjMat[i, j] != 0)
+
+                    if (!Double.IsNaN(adjMat[i, j]))
                     {
                         adjList[i].Add(j);
                     }

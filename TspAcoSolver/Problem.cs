@@ -36,7 +36,7 @@ namespace TspAcoSolver
             {
                 for (int j = 0; j < CityCount; j++)
                 {
-                    adjMat[i, j] = 0;
+                    adjMat[i, j] = Double.NaN;
                 }
             }
             foreach (Pathway pathway in _pathways)
