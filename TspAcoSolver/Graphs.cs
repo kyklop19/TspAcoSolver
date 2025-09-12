@@ -189,7 +189,7 @@ namespace TspAcoSolver
             {
                 for (int j = 0; j < VertexCount; j++)
                 {
-                    Pheromones[i, j] = (1 - EvaporationCoef) * Pheromones[i, j] + pheromoneChange[i, j];
+                    Pheromones[i, j] = Math.Max((1 - EvaporationCoef) * Pheromones[i, j] + pheromoneChange[i, j], minimumPheromoneAmount);
                 }
             }
 

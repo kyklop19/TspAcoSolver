@@ -1,4 +1,4 @@
-- name: Introduction
+- name: Úvod
   href: introduction.md
 - name: Dekompozice
   href: decomposition.md
