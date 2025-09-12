@@ -8,8 +8,8 @@ pheromone_params:
 termination_params:
   termination_rule: fixed | within_percentage
   iteration_count: 1000
-  ceiling_percentage: 2.0
-  in_row_termination_count: 30
+  ceiling_percentage: 5.0
+  in_row_termination_count: 25
 reinitialization_params:
   reinitialization_rule: stagnation
   iter_increment: 200
