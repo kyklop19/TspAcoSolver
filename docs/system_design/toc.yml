@@ -13,3 +13,5 @@
   href: termination.md
 - name: Reinicializace
   href: reinitialization.md
+- name: Benchmarking
+  href: benchmarking.md
