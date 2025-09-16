@@ -35,7 +35,7 @@ public sealed class AcsSolverTests
             pParams.EvaporationCoef = 0.1;
             pParams.PheromoneAmount = 1;
         });
-        serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneVisualiser>();
+        serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneGraphVisualiser>();
         AcsSolver solver = new(
             serviceCollection.BuildServiceProvider(),
             new MockColony(new List<ITour>
@@ -70,7 +70,7 @@ public sealed class AcsSolverTests
             pParams.EvaporationCoef = 0.1;
             pParams.PheromoneAmount = 1;
         });
-        serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneVisualiser>();
+        serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneGraphVisualiser>();
         AcsSolver solver = new(
             serviceCollection.BuildServiceProvider(),
             new MockColony(new List<ITour>

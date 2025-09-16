@@ -76,7 +76,7 @@ class Program
                         serviceCollection.AddTransient<ITerminationChecker, TerminationChecker>();
                         serviceCollection.AddTransient<IReinitializer, Reinitializer>();
 
-                        serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneVisualiser>();
+                        serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneGraphVisualiser>();
 
                         serviceCollection.AddTransient<IAntFactory<IAnt>, AntFactory<AcsAnt>>();
                         serviceCollection.AddTransient<IColony, AcsColony>();

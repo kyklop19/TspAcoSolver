@@ -3,11 +3,28 @@ using Microsoft.Extensions.Options;
 
 namespace TspAcoSolver
 {
+    /// <summary>
+    /// Interface for classes that solve implementation of <c>IProblem</c>
+    /// </summary>
     public interface ISolver
     {
+        /// <summary>
+        /// Count of the iterations made during solution generation
+        /// </summary>
         public int CurrIterationCount { get; }
+
+        /// <summary>
+        /// Try to find solution <c>ITour</c> whose length is as close as possible to the length of the optimal solution
+        /// </summary>
+        /// <param name="problem">Problem for which to find solution</param>
+        /// <returns>Solution <c>ITour</c> whose length is as close as possible to the length of the optimal solution</returns>
         public ITour Solve(IProblem problem);
     }
+
+    /// <summary>
+    /// Abstract class that implements common solving approach of Ant colony optimization algorithms
+    /// </summary>
+    /// <param name="_serviceProvider">Provider that provides services for dependency injection</param>
     public abstract class SolverBase(IServiceProvider _serviceProvider) : ISolver
     {
         IProblem _problem;
@@ -19,6 +36,10 @@ namespace TspAcoSolver
 
         Counter _currIterationCounter = new();
         Counter _stagnationCounter = new();
+
+        /// <summary>
+        /// Count of the iterations made during solution generation
+        /// </summary>
         public int CurrIterationCount { get => _currIterationCounter.Value; }
 
         protected ITour _minimumLengthSolInIter = new InfiniteTour();
@@ -26,6 +47,13 @@ namespace TspAcoSolver
         ITerminationChecker _terminationChecker;
         IReinitializer _reinitializer;
 
+        /// <summary>
+        /// Construct solver with colony, termination checker and reinitializer
+        /// </summary>
+        /// <param name="serviceProvider">Provider that provides services for dependency injection</param>
+        /// <param name="colony">Colony that generates solutions</param>
+        /// <param name="terminationChecker">Checker that checks if solution generation should terminate</param>
+        /// <param name="reinitializer">Reinitializer that tries to reinitilize pheromone values if conditions are met</param>
         public SolverBase(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer) : this(serviceProvider)
         {
             AntColony = colony;
@@ -50,6 +78,11 @@ namespace TspAcoSolver
         /// </returns>
         protected abstract List<ITour> FilterSolutions(List<ITour> solutions);
 
+        /// <summary>
+        /// Find minimal solution in last iteration, update best-so-far solution and filter solutions
+        /// </summary>
+        /// <param name="solutions">Solutions to post process</param>
+        /// <returns>Filtered solutions to be updated in graph</returns>
         List<ITour> PostprocessSolutions(List<ITour> solutions)
         {
             _minimumLengthSolInIter = new InfiniteTour();
@@ -132,13 +165,29 @@ namespace TspAcoSolver
     /// </summary>
     public class AsSolver : SolverBase
     {
-        public AsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer) : base(serviceProvider, colony, terminationChecker, reinitializer){}
+        /// <summary>
+        /// Construct solver with colony, termination checker and reinitializer
+        /// </summary>
+        /// <param name="serviceProvider">Provider that provides services for dependency injection</param>
+        /// <param name="colony">Colony that generates solutions</param>
+        /// <param name="terminationChecker">Checker that checks if solution generation should terminate</param>
+        /// <param name="reinitializer">Reinitializer that tries to reinitilize pheromone values if conditions are met</param>
+        public AsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer) : base(serviceProvider, colony, terminationChecker, reinitializer) { }
 
+        /// <summary>
+        /// Filter solution so that for all solution the pheromones in the graph are updated
+        /// </summary>
+        /// <param name="solutions">Found solutions by the colony</param>
+        /// <returns>Solutions that should have their edge's pheromones updated</returns>
         protected override List<ITour> FilterSolutions(List<ITour> solutions)
         {
             return solutions;
         }
 
+        /// <summary>
+        /// For all solution update their edge's pheromone levels and evaporate pheromones in whole graph
+        /// </summary>
+        /// <param name="solutions">Solution for which to update all their edge's pheromone levels</param>
         protected override void UpdatePheromones(List<ITour> solutions)
         {
             Graph.UpdatePheromonesOnWholeGraph(solutions);
@@ -150,8 +199,20 @@ namespace TspAcoSolver
     /// </summary>
     public class AcsSolver : SolverBase
     {
-        public AcsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer) : base(serviceProvider, colony, terminationChecker, reinitializer){}
+        /// <summary>
+        /// Construct solver with colony, termination checker and reinitializer
+        /// </summary>
+        /// <param name="serviceProvider">Provider that provides services for dependency injection</param>
+        /// <param name="colony">Colony that generates solutions</param>
+        /// <param name="terminationChecker">Checker that checks if solution generation should terminate</param>
+        /// <param name="reinitializer">Reinitializer that tries to reinitilize pheromone values if conditions are met</param>
+        public AcsSolver(IServiceProvider serviceProvider, IColony colony, ITerminationChecker terminationChecker, IReinitializer reinitializer) : base(serviceProvider, colony, terminationChecker, reinitializer) { }
 
+        /// <summary>
+        /// Filter solutions so that only minimal solution in this iteration has its edge's pheromones levels updated
+        /// </summary>
+        /// <param name="solutions">All found solution found by colony</param>
+        /// <returns>Minimal solution in this iteration</returns>
         protected override List<ITour> FilterSolutions(List<ITour> solutions)
         {
             List<ITour> res = new();
@@ -162,6 +223,10 @@ namespace TspAcoSolver
             return res;
         }
 
+        /// <summary>
+        /// For each edge in minimal solution in this iteration update its pheromone amount
+        /// </summary>
+        /// <param name="solutions">List with only minimal solution in this iteration</param>
         protected override void UpdatePheromones(List<ITour> solutions)
         {
             // Console.WriteLine($"Global update");

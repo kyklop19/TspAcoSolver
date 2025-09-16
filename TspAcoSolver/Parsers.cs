@@ -5,12 +5,29 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace TspAcoSolver
 {
+    /// <summary>
+    /// Interface for parsers that parse files with traveling salesman problem
+    /// </summary>
     interface IParser
     {
+        /// <summary>
+        /// Parse file with traveling salesman problem whose path is <c>path</c>
+        /// </summary>
+        /// <param name="path">Path to the file with traveling salesman problem</param>
+        /// <returns></returns>
         public IProblem Parse(string path);
     }
+
+    /// <summary>
+    /// Parser for parsing files with traveling salesman problem in <c>.tsp</c> file format
+    /// </summary>
     public class TspParser : IParser
     {
+        /// <summary>
+        /// Parse file with traveling salesman problem in <c>.tsp</c> file format whose path is <c>path</c>
+        /// </summary>
+        /// <param name="path">Path to the file with traveling salesman problem</param>
+        /// <returns></returns>
         public IProblem Parse(string path)
         {
             IProblem? res = null; //TODO: change?
@@ -53,10 +70,10 @@ namespace TspAcoSolver
                         else
                         {
                             string[] strCoord = line.Split(" ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                            double[] coord = new double[strCoord.Length-1];
+                            double[] coord = new double[strCoord.Length - 1];
                             for (int i = 1; i < strCoord.Length; i++)
                             {
-                                coord[i-1] = Convert.ToDouble(strCoord[i], new CultureInfo("en-US"));
+                                coord[i - 1] = Convert.ToDouble(strCoord[i], new CultureInfo("en-US"));
                             }
                             coords.Add(coord);
                         }
@@ -64,17 +81,31 @@ namespace TspAcoSolver
 
                 }
             }
-            switch (edgeWeightType)
+
+            Match match = Regex.Match(edgeWeightType, @"^EUC_(\d)D$");
+
+            if (match.Success)
             {
-                case "EUC_2D":
-                    res = new EuclidTravelingSalesmanProblem(2, coords);
-                    break;
+                res = new EuclidTravelingSalesmanProblem(Convert.ToInt32(match.Groups[1].Value), coords);
+            }
+            else
+            {
+                throw new Exception($"Parsing of problem type {edgeWeightType} is currently not implemented.");
             }
             return res;
         }
     }
+
+    /// <summary>
+    /// Parser for parsing files with traveling salesman problem in <c>.csv</c> file format
+    /// </summary>
     public class CsvParser : IParser
     {
+        /// <summary>
+        /// Parse file with traveling salesman problem in <c>.csv</c> file format whose path is <c>path</c>
+        /// </summary>
+        /// <param name="path">Path to the file with traveling salesman problem</param>
+        /// <returns></returns>
         public IProblem Parse(string path)
         {
             List<Pathway> pathways = new();

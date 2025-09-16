@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace TspAcoSolver
 {
+    /// <summary>
+    /// Visualizer for visualizing graph
+    /// </summary>
     public class Visualiser
     {
         PheromoneGraph _pheromoneGraph;
@@ -16,6 +19,9 @@ namespace TspAcoSolver
         Microsoft.Msagl.GraphViewerGdi.GViewer _viewer;
         Microsoft.Msagl.Drawing.Graph _graph;
 
+        /// <summary>
+        /// Render graph
+        /// </summary>
         void VisualiseGraph()
         {
             for (int i = 0; i < _problem.CityCount; i++)
@@ -48,11 +54,20 @@ namespace TspAcoSolver
             // c.Attr.Shape = Microsoft.Msagl.Drawing.Shape.Diamond;
         }
 
+        /// <summary>
+        /// Construct from graph and problem
+        /// </summary>
+        /// <param name="pheromoneGraph">Graph of <c>problem</c> to visualize</param>
+        /// <param name="problem">Problem to visualize</param>
         public Visualiser(PheromoneGraph pheromoneGraph, SpaceTravelingSalesmanProblem problem)
         {
             _pheromoneGraph = pheromoneGraph;
             _problem = problem;
         }
+
+        /// <summary>
+        /// Show window with visualization
+        /// </summary>
         void Show()
         {
             _viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
@@ -75,6 +90,10 @@ namespace TspAcoSolver
             _form.ResumeLayout();
             _form.ShowDialog();
         }
+
+        /// <summary>
+        /// Start showing window from separate thread
+        /// </summary>
         public void Visualise()
         {
             Thread t = new Thread(new ThreadStart(Show));
@@ -82,17 +101,43 @@ namespace TspAcoSolver
         }
     }
 
+
+    /// <summary>
+    /// Interface for visualizing <c>PheromoneGraph</c>.
+    /// </summary>
     public interface IPheromoneGraphVisualiser
     {
+        /// <summary>
+        /// Load <c>graph</c> that should be visualized.
+        /// </summary>
+        /// <param name="graph"><c>PheromoneGraph</c> that visualized</param>
         public void SetGraph(PheromoneGraph graph);
+
+        /// <summary>
+        /// Refresh the visuals of the visualizer intended for when <c>PheromoneGraph</c> changes.
+        /// </summary>
         public void Refresh();
     }
-    public class NullPheromoneVisualiser : IPheromoneGraphVisualiser
+
+    /// <summary>
+    /// Visualizer of <c>PheromoneGraph</c> that doesn't visualize anything.
+    /// </summary>
+    public class NullPheromoneGraphVisualiser : IPheromoneGraphVisualiser
     {
-        public void SetGraph(PheromoneGraph graph){}
-        public void Refresh(){}
+        /// <summary>
+        /// Doesn't set the <c>graph</c>
+        /// </summary>
+        /// <param name="graph"></param>
+        public void SetGraph(PheromoneGraph graph) { }
+        /// <summary>
+        /// Doesn't refresh
+        /// </summary>
+        public void Refresh() { }
     }
 
+    /// <summary>
+    /// Visualizer that shows the pheromone matrix of the <c>PheromoneGraph</c> as a heatmap.
+    /// </summary>
     public class HeatmapPheromoneVisualiser : IPheromoneGraphVisualiser
     {
         Form _form = new();
@@ -101,6 +146,10 @@ namespace TspAcoSolver
         Thread _thread;
 
         bool _enableLabels = false;
+
+        /// <summary>
+        /// Render labels with amount of pheromones on edge
+        /// </summary>
         void AddLabels()
         {
             for (int y = 0; y < _pheromones.GetLength(0); y++)
@@ -113,11 +162,14 @@ namespace TspAcoSolver
                     text.Alignment = Alignment.MiddleCenter;
                     text.LabelFontSize = 10;
                     text.LabelFontColor = Colors.Red;
-                    text.LabelText = "test";
+                    text.LabelText = label;
                 }
             }
         }
 
+        /// <summary>
+        /// Rerender heatmap in the form
+        /// </summary>
         void DrawHeatmap()
         {
             _formsPlot.Plot.Clear();
@@ -129,12 +181,21 @@ namespace TspAcoSolver
             _formsPlot.Refresh();
         }
 
+        /// <summary>
+        /// Toggle visibility of the pheromone amount labels
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void ToggleLabels(object sender, EventArgs e)
         {
             _enableLabels = !_enableLabels;
             Refresh();
         }
 
+        /// <summary>
+        /// Load the visualized <c>graph</c> and start the visualizer in separate thread.
+        /// </summary>
+        /// <param name="graph">Graph to be visualized</param>
         public void SetGraph(PheromoneGraph graph)
         {
             _pheromones = graph.Pheromones;
@@ -175,6 +236,9 @@ namespace TspAcoSolver
             }
         }
 
+        /// <summary>
+        /// Invoke rerendering of the heatmap
+        /// </summary>
         public void Refresh()
         {
             _formsPlot.Invoke(DrawHeatmap);

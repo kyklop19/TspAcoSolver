@@ -28,7 +28,7 @@ public sealed class AcsColonyTests
             DecayCoef = 0.1,
             EvaporationCoef = 0.1,
             PheromoneAmount = 1,
-        }, new NullPheromoneVisualiser()));
+        }, new NullPheromoneGraphVisualiser()));
 
         Assert.AreEqual(178, sols[0].Length);
         Assert.AreEqual(96, sols[1].Length);

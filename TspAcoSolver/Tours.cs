@@ -16,43 +16,92 @@ namespace TspAcoSolver
         /// <param name="vertex">Vertex to be next in order in the tour</param>
         public void Add(int vertex);
 
+        /// <summary>
+        /// Vertices that are the part of the tour in order that represent the edges of the tour
+        /// </summary>
         public List<int> Vertices { get; init; }
 
+        /// <summary>
+        /// Check if tour contains all vertices of graph
+        /// </summary>
+        /// <returns>True if tour contains all vertices of graph</returns>
         public bool HasAllVertices();
+
+        /// <summary>
+        /// Check if last added vertex has any neighbors that aren't part of the tour
+        /// </summary>
+        /// <returns></returns>
         public bool HasDeadEnd();
 
+        /// <summary>
+        /// Return neighboring vertices of last added vertex that aren't part of the tour
+        /// </summary>
+        /// <returns>Neighboring vertices of last added vertex that aren't part of the tour</returns>
         public List<int> NextPossibleVertices();
 
+        /// <summary>
+        /// Check if tour has all vertices of graph and that if between first and last vertex exists edge.
+        /// </summary>
+        /// <returns>True if tour has all vertices of graph and that if between first and last vertex exists edge</returns>
         public bool IsValid();
     }
 
+    /// <summary>
+    /// Thrown when trying to access properties or call methods that can only be used when tour is complete
+    /// </summary>
     public class IncompleteTourException : Exception
     {
+        /// <summary>
+        /// Construct empty
+        /// </summary>
         public IncompleteTourException()
         {
         }
 
+        /// <summary>
+        /// Construct with <c>message</c>
+        /// </summary>
+        /// <param name="message">Message to show</param>
         public IncompleteTourException(string message)
             : base(message)
         {
         }
 
+        /// <summary>
+        /// Construct with <c>message</c> and inner exception
+        /// </summary>
+        /// <param name="message">Message to show</param>
+        /// <param name="inner">Inner exception</param>
         public IncompleteTourException(string message, Exception inner)
             : base(message, inner)
         {
         }
     }
+
+    /// <summary>
+    /// Thrown when trying to add vertex to tour that is already part of the tour.
+    /// </summary>
     public class DuplicateVertexException : Exception
     {
+        /// <summary>
+        /// Construct empty
+        /// </summary>
         public DuplicateVertexException()
         {
         }
-
+        /// <summary>
+        /// Construct with <c>message</c>
+        /// </summary>
+        /// <param name="message">Message to show</param>
         public DuplicateVertexException(string message)
             : base(message)
         {
         }
-
+        /// <summary>
+        /// Construct with <c>message</c> and inner exception
+        /// </summary>
+        /// <param name="message">Message to show</param>
+        /// <param name="inner">Inner exception</param>
         public DuplicateVertexException(string message, Exception inner)
             : base(message, inner)
         {
@@ -131,6 +180,10 @@ namespace TspAcoSolver
             Vertices.Add(vertex);
         }
 
+        /// <summary>
+        /// Return neighboring vertices of last added vertex that aren't part of the tour
+        /// </summary>
+        /// <returns>Neighboring vertices of last added vertex that aren't part of the tour</returns>
         public List<int> NextPossibleVertices() //TODO: store in atr
         {
             if (Vertices.Count == 0)
@@ -193,6 +246,10 @@ namespace TspAcoSolver
             return HasAllVertices() && CanConnectStartAndFinish();
         }
 
+        /// <summary>
+        /// Return string with all of the vertices in order of the tour
+        /// </summary>
+        /// <returns>String with all of the vertices in order of the tour</returns>
         public override string ToString()
         {
             string res = "";
@@ -205,24 +262,53 @@ namespace TspAcoSolver
         }
 
     }
+
+    /// <summary>
+    /// Tour that has infinite length
+    /// </summary>
     public class InfiniteTour : ITour
     {
+        /// <summary>
+        /// Construct with empty list of vertices
+        /// </summary>
         public InfiniteTour()
         {
             Vertices = new();
         }
-        public double Length { get => Double.PositiveInfinity; }
 
+        /// <summary>
+        /// Return length of positive infinity
+        /// </summary>
+        public double Length { get => Double.PositiveInfinity; }
+        /// <summary>
+        /// Do nothing
+        /// </summary>
+        /// <param name="vertex">Vertex to add</param>
         public void Add(int vertex) { }
 
+        /// <summary>
+        /// Empty list of vertices
+        /// </summary>
         public List<int> Vertices { get; init; }
-
+        /// <summary>
+        /// Return <c>false</c>
+        /// </summary>
+        /// <returns><c>false</c></returns>
         public bool HasAllVertices() => false;
-
+        /// <summary>
+        /// Return <c>true</c>
+        /// </summary>
+        /// <returns><c>true</c></returns>
         public bool HasDeadEnd() => true;
-
+        /// <summary>
+        /// Return empty list
+        /// </summary>
+        /// <returns>Empty list of vertices</returns>
         public List<int> NextPossibleVertices() => new();
-
+        /// <summary>
+        /// Return <c>false</c>
+        /// </summary>
+        /// <returns><c>false</c></returns>
         public bool IsValid() => false;
     }
 }

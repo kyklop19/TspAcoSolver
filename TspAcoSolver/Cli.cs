@@ -7,14 +7,23 @@ using ScottPlot.Plottables;
 
 namespace TspAcoSolver
 {
-    public enum ProblemType
+    /// <summary>
+    /// Enum representing how instance of traveling salesman problem is described in given file
+    /// </summary>
+    public enum ProblemDescriptionType
     {
+        /// <summary>
+        /// Instance of traveling salesman problem is described by explicitly listing source vertex, target vertex and edge length
+        /// </summary>
         Explicit,
+        /// <summary>
+        /// Instance of traveling salesman problem is described as coordinate tuples of each city/vertex
+        /// </summary>
         Euclid,
     }
 
     /// <summary>
-    /// <c>Cli</c> represents user interface for reading problems from files, set solving parameters and running solvers.
+    /// <c>Cli</c> represents command-line user interface for reading problems from files, set solving parameters and running solvers.
     /// </summary>
     public class Cli
     {
@@ -26,6 +35,10 @@ namespace TspAcoSolver
         bool _quit = false;
 
         bool _enableHeatmap = false;
+
+        /// <summary>
+        /// Construct CLI, load default solving parameters and create command that users can invoke
+        /// </summary>
         public Cli()
         {
             Config config = new();
@@ -35,6 +48,10 @@ namespace TspAcoSolver
 
             CreateCommands();
         }
+
+        /// <summary>
+        /// Create commands that users can invoke when CLI is running
+        /// </summary>
         void CreateCommands()
         {
             HelpOption helpOption = new();
@@ -79,7 +96,7 @@ namespace TspAcoSolver
             const string probCmdName = "prob";
 
             Argument<string> problemPathArg = new("path");
-            Option<ProblemType?> problemTypeOpt = new("--type", ["-t"]);
+            Option<ProblemDescriptionType?> problemTypeOpt = new("--type", ["-t"]);
             Command probCommand = new(probCmdName, "Set problem");
 
             probCommand.Arguments.Add(problemPathArg);
@@ -101,6 +118,10 @@ namespace TspAcoSolver
             };
         }
 
+
+        /// <summary>
+        /// Start the CLI and keep accepting commands until "quit" is invoked
+        /// </summary>
         public void Run()
         {
             while (!_quit)
@@ -120,7 +141,12 @@ namespace TspAcoSolver
             }
         }
 
-        void SetProblem(string path, ProblemType? problemType)
+        /// <summary>
+        /// Set and store problem that should be solved when solving command is invoked
+        /// </summary>
+        /// <param name="path">Path to file that contains description of given traveling salesman problem</param>
+        /// <param name="problemType">Type of how problem is described in the file and how it should be interpreted</param>
+        void SetProblem(string path, ProblemDescriptionType? problemType)
         {
             if (path.EndsWith(".csv"))
             {
@@ -131,7 +157,7 @@ namespace TspAcoSolver
                         Console.WriteLine($"Csv file needs specified problem type. Use \"--type\" option.");
                         Console.ResetColor();
                         break;
-                    case ProblemType.Explicit:
+                    case ProblemDescriptionType.Explicit:
                         CsvParser csvParser = new();
                         _problem = csvParser.Parse(path);
                         break;
@@ -144,6 +170,10 @@ namespace TspAcoSolver
             }
         }
 
+        /// <summary>
+        /// Read parameters from file with path <c>path</c> that overwrite default parameters.
+        /// </summary>
+        /// <param name="path">Path of file with parameters</param>
         void SetConfig(string path)
         {
             Config config = new();
@@ -153,6 +183,10 @@ namespace TspAcoSolver
 
         }
 
+        /// <summary>
+        /// Prepare services for dependency injection, initialize solver and let it generate solution that is then returned
+        /// </summary>
+        /// <returns>Solution found by the solver</returns>
         ITour GetSolution()
         {
             Stopwatch stopWatch = new();
@@ -192,7 +226,7 @@ namespace TspAcoSolver
             }
             else
             {
-                serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneVisualiser>();
+                serviceCollection.AddTransient<IPheromoneGraphVisualiser, NullPheromoneGraphVisualiser>();
             }
 
             switch (_sParams.Algorithm)
@@ -218,6 +252,10 @@ namespace TspAcoSolver
             Console.WriteLine($"Time elapsed: {stopWatch.Elapsed} | Iteration count: {_solver.CurrIterationCount}");
             return res;
         }
+
+        /// <summary>
+        /// Quit from running the user interface
+        /// </summary>
         void Quit()
         {
             _quit = true;

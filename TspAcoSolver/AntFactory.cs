@@ -43,17 +43,4 @@ namespace TspAcoSolver
             return ants;
         }
     }
-    // public class AcsAntFactory(IServiceProvider _serviceProvider) : IAntFactory
-    // {
-    //     public IAnt[] CreateAnts(int count)
-    //     {
-    //         AcsAnt[] ants = new AcsAnt[count];
-    //         for (int i = 0; i < count; i++)
-    //         {
-    //             ants[i] = ActivatorUtilities.CreateInstance<AcsAnt>(_serviceProvider);
-    //             // new AcsAnt(colonyParams, (IRandom)new RandomGen());
-    //         }
-    //         return ants;
-    //     }
-    // }
 }
